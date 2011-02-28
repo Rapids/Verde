@@ -29,25 +29,35 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GlobalForm));
-            this.InnerBrowser = new System.Windows.Forms.WebBrowser();
+            this.rtboxMain = new System.Windows.Forms.RichTextBox();
+            this.btnQuery = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // InnerBrowser
+            // rtboxMain
             // 
-            this.InnerBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InnerBrowser.Location = new System.Drawing.Point(0, 0);
-            this.InnerBrowser.MinimumSize = new System.Drawing.Size(20, 20);
-            this.InnerBrowser.Name = "InnerBrowser";
-            this.InnerBrowser.Size = new System.Drawing.Size(472, 766);
-            this.InnerBrowser.TabIndex = 0;
-            this.InnerBrowser.Url = new System.Uri("http://pya.cc/ipn/index.php", System.UriKind.Absolute);
+            this.rtboxMain.Location = new System.Drawing.Point(12, 12);
+            this.rtboxMain.Name = "rtboxMain";
+            this.rtboxMain.Size = new System.Drawing.Size(448, 710);
+            this.rtboxMain.TabIndex = 0;
+            this.rtboxMain.Text = "";
+            // 
+            // btnQuery
+            // 
+            this.btnQuery.Location = new System.Drawing.Point(385, 731);
+            this.btnQuery.Name = "btnQuery";
+            this.btnQuery.Size = new System.Drawing.Size(75, 23);
+            this.btnQuery.TabIndex = 1;
+            this.btnQuery.Text = "Query";
+            this.btnQuery.UseVisualStyleBackColor = true;
+            this.btnQuery.Click += new System.EventHandler(this.btnQuery_Click);
             // 
             // GlobalForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(472, 766);
-            this.Controls.Add(this.InnerBrowser);
+            this.Controls.Add(this.btnQuery);
+            this.Controls.Add(this.rtboxMain);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GlobalForm";
             this.Text = "Verde";
@@ -57,7 +67,9 @@
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser InnerBrowser;
+        private System.Windows.Forms.RichTextBox rtboxMain;
+        private System.Windows.Forms.Button btnQuery;
+
     }
 }
 
