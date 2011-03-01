@@ -26,9 +26,11 @@ namespace Verde
             using (var sr = new StreamReader(stream, Encoding.UTF8))
             {
                 var xml = ParseHtml(sr);
-                foreach (var item in xml.Descendants("h3"))
+
+                XNamespace ns = "http://www.w3.org/1999/xhtml";
+                foreach (var item in xml.Descendants(ns + "img"))
                 {
-                    this.rtboxMain.Text += item.Value;
+                    this.rtboxMain.Text += item.FirstAttribute.Value.ToString() + Environment.NewLine;
                 }
             }
         }
