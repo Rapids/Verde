@@ -15,9 +15,18 @@ namespace Verde
 {
     public partial class GlobalForm : Form
     {
+        private ExternalCacheDatabase dbCache;
+
         public GlobalForm()
         {
             InitializeComponent();
+
+            this.dbCache = new ExternalCacheDatabase();
+        }
+
+        private void CheckPath(string strPath)
+        {
+            Console.WriteLine(strPath);
         }
 
         private void btnQuery_Click(object sender, EventArgs e)
@@ -30,7 +39,12 @@ namespace Verde
                 XNamespace ns = "http://www.w3.org/1999/xhtml";
                 foreach (var item in xml.Descendants(ns + "img"))
                 {
-                    this.rtboxMain.Text += item.FirstAttribute.Value.ToString() + Environment.NewLine;
+                    string strUrl = item.FirstAttribute.Value.ToString();
+                    if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
+                        strUrl = "http://pya.cc" + strUrl;
+                    }
+                    this.dbCache.GetCache(strUrl, CheckPath);
+                    this.rtboxMain.Text += strUrl + Environment.NewLine;
                 }
             }
         }

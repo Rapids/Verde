@@ -4,17 +4,27 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 using System.Windows.Media.Imaging;
+using System.Windows.Forms;
+using System.Security.Cryptography;
+using System.Text;
+using System.IO;
+using System.Reflection;
 
 namespace Verde
 {
     //外部キャッシュ管理
     public class ExternalCacheDatabase
     {
+        private static string strCachePath;
         private Dictionary<string, Queue<Action<string>>> tasks = null;
 
         public ExternalCacheDatabase()
         {
             tasks = new Dictionary<string, Queue<Action<string>>>();
+
+            Assembly asm = Assembly.GetEntryAssembly();
+            string fullPath = asm.Location;
+            strCachePath = Path.GetDirectoryName(fullPath);
         }
 
         public void GetCache(string url, Action<string> action)
@@ -35,14 +45,23 @@ namespace Verde
             GetCacheMethod(func)(imageUrl, action);
         }
 
+        public string ToHexString(byte[] byteArray)
+        {
+            string strHex = String.Empty;
+            for (int i = 0; i < byteArray.Length; i++) {
+                strHex += String.Format("{0:X2}", byteArray[i]);
+            }
+            return strHex;
+        }
+
         //キャッシュを削除する
         public void DeleteCache(string url)
         {
             //URLのハッシュ
-            string hexString = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)).ToHexString();
+            string hexString = this.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)));
 
             //ファイル名
-            string fileName = Path.Combine(Core.ExternalsCacheFolder, hexString);
+            string fileName = Path.Combine(strCachePath, hexString);
             lock (tasks) {
                 if (tasks.ContainsKey(hexString)) {
                     MessageBox.Show("ファイルのダウンロード中は削除できません。");
@@ -56,7 +75,7 @@ namespace Verde
                 } catch (IOException) {
                     MessageBox.Show("ファイルの使用中は削除できません。");
                 } catch (Exception ex)                 {
-                    MessageBox.Show("不明なエラーが発生しました：" + Environment.NewLine + ex.CreateMessage(0));
+                    MessageBox.Show("不明なエラーが発生しました：" + Environment.NewLine + ex.Message);
                 }
             } else {
                 MessageBox.Show("ファイルが存在しません。");
@@ -67,9 +86,9 @@ namespace Verde
         private Action<string, Action<T>> GetCacheMethod<T>(Func<string, T> func)
         {
             return (url, action) => {
-                string hexString = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)).ToHexString();
+                string hexString = this.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)));
 
-                string fileName = Path.Combine(Core.ExternalsCacheFolder, hexString);
+                string fileName = Path.Combine(strCachePath, hexString);
 
                 lock (tasks) {
                     Queue<Action<string>> task = null;
@@ -97,15 +116,15 @@ namespace Verde
 
         private WebFileDownloader CreateFileDownloader(string url, string fileName, string hexString)
         {
-            int key = StatusProgressService.StartProgress();
+            //int key = StatusProgressService.StartProgress();
 
             WebFileDownloader webFileDownloader = new WebFileDownloader(url, fileName);
             webFileDownloader.DownloadProgressChanged = (e) => {
-                StatusProgressService.ChangeProgress(key, e.ProgressPercentage);
+                //StatusProgressService.ChangeProgress(key, e.ProgressPercentage);
             };
 
             webFileDownloader.DownloadFileCompleted = (e) => {
-                StatusProgressService.CompleteProgress(key);
+                //StatusProgressService.CompleteProgress(key);
 
                 Queue<Action<string>> task = null;
                 lock (tasks) {
