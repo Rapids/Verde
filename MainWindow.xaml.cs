@@ -42,6 +42,16 @@ namespace Verde
                 var xml = ParseHtml(sr);
 
                 XNamespace ns = "http://www.w3.org/1999/xhtml";
+
+                string strStyle = xml.Root.Element(ns + "body").Attribute("style").Value;
+                string strBackground = "background-color:#";
+                if (String.Compare(strBackground, 0, strStyle, 0, strBackground.Length, true) == 0) {
+                    string strBgValue = strStyle.Substring(strBackground.Length, strStyle.Length - strBackground.Length);
+                    //this.canvasMain.Background.SetValue(BackgroundProperty, 2323232);
+                    //strBgValue.bv
+                    //this.canvasMain.ba
+                }
+
                 foreach (var item in xml.Descendants(ns + "img"))
                 {
                     XAttribute attr = item.Attribute("class");
