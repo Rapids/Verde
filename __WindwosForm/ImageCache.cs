@@ -24,7 +24,11 @@ namespace Verde
 
             Assembly asm = Assembly.GetEntryAssembly();
             string fullPath = asm.Location;
-            strCachePath = Path.GetDirectoryName(fullPath);
+            strCachePath = Path.GetDirectoryName(fullPath) + Path.DirectorySeparatorChar + "cache";
+            if (Directory.Exists(strCachePath) == false)
+            {
+                Directory.CreateDirectory(strCachePath);
+            }
         }
 
         public void GetCache(string url, Action<string> action)

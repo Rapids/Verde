@@ -29,17 +29,8 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GlobalForm));
-            this.rtboxMain = new System.Windows.Forms.RichTextBox();
             this.btnQuery = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // rtboxMain
-            // 
-            this.rtboxMain.Location = new System.Drawing.Point(12, 12);
-            this.rtboxMain.Name = "rtboxMain";
-            this.rtboxMain.Size = new System.Drawing.Size(448, 710);
-            this.rtboxMain.TabIndex = 0;
-            this.rtboxMain.Text = "";
             // 
             // btnQuery
             // 
@@ -57,7 +48,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(472, 766);
             this.Controls.Add(this.btnQuery);
-            this.Controls.Add(this.rtboxMain);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GlobalForm";
             this.Text = "Verde";
@@ -67,7 +57,6 @@
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox rtboxMain;
         private System.Windows.Forms.Button btnQuery;
 
     }
