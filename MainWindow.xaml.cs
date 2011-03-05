@@ -47,9 +47,9 @@ namespace Verde
                 string strBackground = "background-color:#";
                 if (String.Compare(strBackground, 0, strStyle, 0, strBackground.Length, true) == 0) {
                     string strBgValue = strStyle.Substring(strBackground.Length, strStyle.Length - strBackground.Length);
-                    //this.canvasMain.Background.SetValue(BackgroundProperty, 2323232);
-                    //strBgValue.bv
-                    //this.canvasMain.ba
+                    SolidColorBrush mySolidColorBrush = new SolidColorBrush();
+                    mySolidColorBrush.Color = Color.FromRgb(Convert.ToByte(strBgValue.Substring(0, 2), 16), Convert.ToByte(strBgValue.Substring(2, 2), 16), Convert.ToByte(strBgValue.Substring(4, 2), 16));
+                    this.canvasMain.Background = mySolidColorBrush;
                 }
 
                 foreach (var item in xml.Descendants(ns + "img"))
