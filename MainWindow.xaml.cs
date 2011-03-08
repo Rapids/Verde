@@ -27,7 +27,7 @@ namespace Verde
         private ExternalCacheDatabase dbCache;
         private Point posCurrent;
         private bool bLargeThumb = true;
-        private Storyboard myStoryboard;
+        private bool bDisplaySettings = false;
 
         public MainWindow()
         {
@@ -56,7 +56,7 @@ namespace Verde
                         if (StringProcessing.IsHexadecimal(strBgValue) == true) {
                             SolidColorBrush brsBackground = new SolidColorBrush();
                             brsBackground.Color = StringProcessing.ConvertFromHexStringToColor(strBgValue);
-                            this.canvasMain.Background = brsBackground;
+                            this.canvasGlobal.Background = brsBackground;
                         }
                     }
                 }
@@ -105,15 +105,17 @@ namespace Verde
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            DoubleAnimation myDoubleAnimation = new DoubleAnimation(0.0, 1.0, new Duration(TimeSpan.FromSeconds(10)), FillBehavior.Stop);
+            Canvas.SetZIndex(canvasSettings, 2);
+            canvasSettings.Opacity = (bDisplaySettings)? 1.0: 0.0;
+            DoubleAnimation myDoubleAnimation = new DoubleAnimation(canvasSettings.Opacity, (bDisplaySettings) ? 0.0 : 1.0, new Duration(TimeSpan.FromSeconds(0.2)), FillBehavior.HoldEnd);
             myDoubleAnimation.Completed += new EventHandler(myDoubleAnimation_Completed);
             canvasSettings.BeginAnimation(Rectangle.OpacityProperty, myDoubleAnimation);
-            canvasSettings.Visibility = Visibility.Visible;
+            //canvasSettings.Visibility = Visibility.Visible;
         }
 
         void myDoubleAnimation_Completed(object sender, EventArgs e)
         {
-            canvasSettings.Opacity = 1.0;
+            bDisplaySettings = !bDisplaySettings;
         }
     }
 }
