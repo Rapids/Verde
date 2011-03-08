@@ -10,152 +10,139 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 
-namespace Verde
+namespace Verde.Utility
 {
-    //外部キャッシュ管理
     public class ExternalCacheDatabase
     {
-        private static string strCachePath;
-        private Dictionary<string, Queue<Action<string>>> tasks = null;
+        private string strCachePath;
+        private Dictionary<string, Queue<Action<string>>> dicTasks = null;
 
         public ExternalCacheDatabase()
         {
-            tasks = new Dictionary<string, Queue<Action<string>>>();
+            this.dicTasks = new Dictionary<string, Queue<Action<string>>>();
 
-            Assembly asm = Assembly.GetEntryAssembly();
-            string fullPath = asm.Location;
-            strCachePath = Path.GetDirectoryName(fullPath) + Path.DirectorySeparatorChar + "cache";
-            if (Directory.Exists(strCachePath) == false)
-            {
-                Directory.CreateDirectory(strCachePath);
+            this.strCachePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "cache";
+            if (Directory.Exists(this.strCachePath) == false) {
+                Directory.CreateDirectory(this.strCachePath);
             }
         }
 
-        public void GetCache(string url, Action<string> action)
+        public void GetCache(string strUrl, Action<string> action)
         {
-            GetCacheMethod(fileName => fileName)(url, action);
+            this.GetCacheMethod(strFilename => strFilename)(strUrl, action);
         }
 
-        public void GetImageCache(string imageUrl, Action<BitmapImage> action)
+        public void GetImageCache(string strUrl, Action<BitmapImage> action)
         {
-            Func<string, BitmapImage> func = (fileName) => {
+            Func<string, BitmapImage> func = (strFilename) => {
                 try {
-                    return new BitmapImage(new Uri(fileName));
+                    return new BitmapImage(new Uri(strFilename));
                 } catch (NotSupportedException) {
-                    MessageBox.Show("画像ファイルでないか対応していない画像ファイルです。");
+                    MessageBox.Show(strFilename + " is not an image file or not supported format.");
                     return null;
                 }
             };
-            GetCacheMethod(func)(imageUrl, action);
+            this.GetCacheMethod(func)(strUrl, action);
         }
 
-        public string ToHexString(byte[] byteArray)
+        public void DeleteCache(string strUrl)
         {
-            string strHex = String.Empty;
-            for (int i = 0; i < byteArray.Length; i++) {
-                strHex += String.Format("{0:X2}", byteArray[i]);
-            }
-            return strHex;
-        }
+            // Make hash code for the URL
+            string strHashHex = StringProcessing.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(strUrl)));
 
-        //キャッシュを削除する
-        public void DeleteCache(string url)
-        {
-            //URLのハッシュ
-            string hexString = this.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)));
-
-            //ファイル名
-            string fileName = Path.Combine(strCachePath, hexString);
-            lock (tasks) {
-                if (tasks.ContainsKey(hexString)) {
-                    MessageBox.Show("ファイルのダウンロード中は削除できません。");
+            // Make Filename to save the image
+            string strFilename = Path.Combine(this.strCachePath, strHashHex);
+            lock (this.dicTasks) {
+                if (this.dicTasks.ContainsKey(strHashHex)) {
+                    MessageBox.Show("Can not delete the cache while in downloading.");
                     return;
                 }
             }
 
-            if (File.Exists(fileName)) {
+            if (File.Exists(strFilename)) {
                 try {
-                    File.Delete(fileName);
+                    File.Delete(strFilename);
                 } catch (IOException) {
-                    MessageBox.Show("ファイルの使用中は削除できません。");
+                    MessageBox.Show("Can not delete the cache file \"" + strFilename  + "\" while in using.");
                 } catch (Exception ex)                 {
-                    MessageBox.Show("不明なエラーが発生しました：" + Environment.NewLine + ex.Message);
+                    MessageBox.Show("Unknown error was occurred.: " + Environment.NewLine + ex.Message);
                 }
             } else {
-                MessageBox.Show("ファイルが存在しません。");
+                MessageBox.Show("The file \"" + strFilename + "\" does not exist.");
             }
 
         }
 
-        private Action<string, Action<T>> GetCacheMethod<T>(Func<string, T> func)
+        private Action<string, Action<T>> GetCacheMethod<T>(Func<string, T> funcGetCacheFilename)
         {
-            return (url, action) => {
-                string hexString = this.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(url)));
+            return (strUrl, actGetCacheFilename) => {
+                string strHashHex = StringProcessing.ToHexString(new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(strUrl)));
 
-                string fileName = Path.Combine(strCachePath, hexString);
+                string strFilename = Path.Combine(this.strCachePath, strHashHex);
 
-                lock (tasks) {
-                    Queue<Action<string>> task = null;
-                    if (tasks.ContainsKey(hexString)) {
-                        task = tasks[hexString];
+                lock (this.dicTasks) {
+                    Queue<Action<string>> queTask = null;
+                    if (this.dicTasks.ContainsKey(strHashHex)) {
+                        queTask = this.dicTasks[strHashHex];
                     }
-                    if (task != null) {
-                        lock (task) {
-                            task.Enqueue(fileName2 => action(func(fileName2)));
+                    if (queTask != null) {
+                        lock (queTask) {
+                            queTask.Enqueue(fileName2 => actGetCacheFilename(funcGetCacheFilename(fileName2)));
                         }
                         return;
                     }
 
-                    if (task == null && !File.Exists(fileName)) {
-                        task = new Queue<Action<string>>();
-                        task.Enqueue(fileName2 => action(func(fileName2)));
-                        tasks.Add(hexString, task);
-                        CreateFileDownloader(url, fileName, hexString).StartDownload();
+                    if (queTask == null && !File.Exists(strFilename)) {
+                        queTask = new Queue<Action<string>>();
+                        queTask.Enqueue(strCacheFilename => actGetCacheFilename(funcGetCacheFilename(strCacheFilename)));
+                        this.dicTasks.Add(strHashHex, queTask);
+                        this.CreateFileDownloader(strUrl, strFilename, strHashHex).StartDownload();
                         return;
                     }
                 }
-                action(func(fileName));
+
+                actGetCacheFilename(funcGetCacheFilename(strFilename));
             };
         }
 
-        private WebFileDownloader CreateFileDownloader(string url, string fileName, string hexString)
+        private WebFileDownloader CreateFileDownloader(string strUrl, string strFilename, string strHashHex)
         {
             //int key = StatusProgressService.StartProgress();
 
-            WebFileDownloader webFileDownloader = new WebFileDownloader(url, fileName);
-            webFileDownloader.DownloadProgressChanged = (e) => {
+            WebFileDownloader dlerWebFile = new WebFileDownloader(strUrl, strFilename);
+            dlerWebFile.DownloadProgressChanged = (e) => {
                 //StatusProgressService.ChangeProgress(key, e.ProgressPercentage);
             };
 
-            webFileDownloader.DownloadFileCompleted = (e) => {
+            dlerWebFile.DownloadFileCompleted = (e) => {
                 //StatusProgressService.CompleteProgress(key);
 
-                Queue<Action<string>> task = null;
-                lock (tasks) {
-                    if (tasks.ContainsKey(hexString)) {
-                        task = tasks[hexString];
+                Queue<Action<string>> queTask = null;
+                lock (this.dicTasks) {
+                    if (this.dicTasks.ContainsKey(strHashHex)) {
+                        queTask = this.dicTasks[strHashHex];
                     } else {
                         return;
                     }
                 }
 
-                Action<string> action = null;
+                Action<string> actGetDownloadFilename = null;
                 while (true) {
-                    lock (task) {
-                        if (task.Count > 0) {
-                            action = task.Dequeue();
+                    lock (queTask) {
+                        if (queTask.Count > 0) {
+                            actGetDownloadFilename = queTask.Dequeue();
                         } else {
-                            action = null;
+                            actGetDownloadFilename = null;
                         }
                     }
 
-                    if (action != null) {
-                        action(fileName);
+                    if (actGetDownloadFilename != null) {
+                        actGetDownloadFilename(strFilename);
                     } else {
-                        lock (tasks) {
-                            lock (task) {
-                                if (task.Count == 0) {
-                                    tasks.Remove(hexString);
+                        lock (this.dicTasks) {
+                            lock (queTask) {
+                                if (queTask.Count == 0) {
+                                    this.dicTasks.Remove(strHashHex);
                                     break;
                                 }
                             }
@@ -164,84 +151,72 @@ namespace Verde
                 }
             };
 
-            webFileDownloader.DownloadFileFailed = (e) => {
+            dlerWebFile.DownloadFileFailed = (e) => {
                 MessageBox.Show(e.Error.Message);
             };
-            return webFileDownloader;
+            return dlerWebFile;
         }
     }
 
-    //Webファイルダウンローダ
-    //Web上のファイルをダウンロードする
     public class WebFileDownloader
     {
-        //コンストラクタ（URL／保存先）
+        private WebClient webClient = null;
+        private string strUrl = null;           // URL to download
+        private string strSaveFilename = null;  // Filename to save
+
         public WebFileDownloader(string _url, string _saveFile)
         {
-            url = _url;
-            saveFile = _saveFile;
+            this.strUrl = _url;
+            this.strSaveFilename = _saveFile;
         }
 
-        //Webクライアント
-        private WebClient webClient = null;
-
-        //ダウンロードするファイルを指し示すURL
-        private string url = null;
-
-        //保存先
-        private string saveFile = null;
-
-        //進捗状況が変化した時に実行する処理
-        private Action<DownloadProgressChangedEventArgs> downloadProgressChanged = null;
+        private Action<DownloadProgressChangedEventArgs> actDownloadProgressChanged = null;
         public Action<DownloadProgressChangedEventArgs> DownloadProgressChanged
         {
-            get { return downloadProgressChanged; }
-            set { downloadProgressChanged = value; }
+            get { return this.actDownloadProgressChanged; }
+            set { this.actDownloadProgressChanged = value; }
         }
 
-        //ファイルのダウンロードが完了した時に実行する処理
-        private Action<AsyncCompletedEventArgs> downloadFileCompleted = null;
+        private Action<AsyncCompletedEventArgs> actDownloadFileCompleted = null;
         public Action<AsyncCompletedEventArgs> DownloadFileCompleted
         {
-            get { return downloadFileCompleted; }
-            set { downloadFileCompleted = value; }
+            get { return this.actDownloadFileCompleted; }
+            set { this.actDownloadFileCompleted = value; }
         }
 
-        //ファイルのダウンロードが失敗した時に実行する処理
-        private Action<AsyncCompletedEventArgs> downloadFileFailed = null;
+        private Action<AsyncCompletedEventArgs> actDownloadFileFailed = null;
         public Action<AsyncCompletedEventArgs> DownloadFileFailed
         {
-            get { return downloadFileFailed; }
-            set { downloadFileFailed = value; }
+            get { return this.actDownloadFileFailed; }
+            set { this.actDownloadFileFailed = value; }
         }
 
-        //非同期ダウンロードを開始する
+        // Start to downlaod as async
         public void StartDownload()
         {
-            //WebClientを作成
             if (webClient == null) {
                 webClient = new WebClient();
                 webClient.DownloadProgressChanged += (sender, e) => {
-                    if (downloadProgressChanged != null) {
-                        downloadProgressChanged(e);
+                    if (this.actDownloadProgressChanged != null) {
+                        this.actDownloadProgressChanged(e);
                     }
                 };
 
                 webClient.DownloadFileCompleted += (sender, e) => {
                     if (e.Error != null) {
-                        if (downloadFileFailed != null)
-                            downloadFileFailed(e);
+                        if (this.actDownloadFileFailed != null) {
+                            this.actDownloadFileFailed(e);
+                    }
                         return;
                     }
-                    if (downloadFileCompleted != null) {
-                        downloadFileCompleted(e);
+                    if (this.actDownloadFileCompleted != null) {
+                        this.actDownloadFileCompleted(e);
                     }
                 };
             }
-            webClient.DownloadFileAsync(new Uri(url), saveFile);
+            webClient.DownloadFileAsync(new Uri(this.strUrl), this.strSaveFilename);
         }
 
-        //非同期ダウンロードをキャンセルする
         public void CancelDownload()
         {
             if (webClient != null) {

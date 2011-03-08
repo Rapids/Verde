@@ -9,12 +9,13 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Net;
 using System.IO;
 using System.Xml.Linq;
-using Sgml;
+using Verde.Utility;
 
 namespace Verde
 {
@@ -25,6 +26,8 @@ namespace Verde
     {
         private ExternalCacheDatabase dbCache;
         private Point posCurrent;
+        private bool bLargeThumb = true;
+        private Storyboard myStoryboard;
 
         public MainWindow()
         {
@@ -36,50 +39,48 @@ namespace Verde
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
         {
-            using (var stream = new WebClient().OpenRead("http://pya.cc/ipn/index.php"))
-            using (var sr = new StreamReader(stream, Encoding.UTF8))
+            using (var stmHome = new WebClient().OpenRead("http://pya.cc/ipn/index.php"))
+            using (var srHome = new StreamReader(stmHome, Encoding.UTF8))
             {
-                var xml = ParseHtml(sr);
+                var xmlHome = HtmlParser.Parse(srHome);
 
                 XNamespace ns = "http://www.w3.org/1999/xhtml";
 
-                string strStyle = xml.Root.Element(ns + "body").Attribute("style").Value;
+                // Set Background Color from style
+                string strStyle = xmlHome.Root.Element(ns + "body").Attribute("style").Value;
                 string strBackground = "background-color:#";
                 if (String.Compare(strBackground, 0, strStyle, 0, strBackground.Length, true) == 0) {
                     string strBgValue = strStyle.Substring(strBackground.Length, strStyle.Length - strBackground.Length);
-                    SolidColorBrush mySolidColorBrush = new SolidColorBrush();
-                    mySolidColorBrush.Color = Color.FromRgb(Convert.ToByte(strBgValue.Substring(0, 2), 16), Convert.ToByte(strBgValue.Substring(2, 2), 16), Convert.ToByte(strBgValue.Substring(4, 2), 16));
-                    this.canvasMain.Background = mySolidColorBrush;
+                    if (strBgValue.Length >= 6) {
+                        strBgValue = strBgValue.Substring(0, 6);
+                        if (StringProcessing.IsHexadecimal(strBgValue) == true) {
+                            SolidColorBrush brsBackground = new SolidColorBrush();
+                            brsBackground.Color = StringProcessing.ConvertFromHexStringToColor(strBgValue);
+                            this.canvasMain.Background = brsBackground;
+                        }
+                    }
                 }
 
-                foreach (var item in xml.Descendants(ns + "img"))
-                {
+                // Extract Thumbnails
+                foreach (var item in xmlHome.Descendants(ns + "img")) {
                     XAttribute attr = item.Attribute("class");
-                    if (attr != null && attr.Value == "thumb")
-                    {
+                    if (attr != null && attr.Value == "thumb") {
                         string strUrl = item.Attribute("src").Value;
-                        if (String.Compare("http:", 0, strUrl, 0, 5) != 0)
-                        {
+                        if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
+                            if (bLargeThumb == true) {
+                                /* 現状決め打ち "/i"を除外する */
+                                strUrl = strUrl.Substring(2);
+                            }
                             strUrl = "http://pya.cc" + strUrl;
                         }
                         this.dbCache.GetCache(strUrl, CheckPath);
-                        this.dbCache.GetImageCache(strUrl, DrarThumbImage);
+                        this.dbCache.GetImageCache(strUrl, this.DrawThumbImage);
                     }
-
                 }
             }
         }
 
-        static XDocument ParseHtml(TextReader reader)
-        {
-            using (var sgmlReader = new SgmlReader { DocType = "HTML", CaseFolding = CaseFolding.ToLower })
-            {
-                sgmlReader.InputStream = reader;
-                return XDocument.Load(sgmlReader);
-            }
-        }
-
-        private void DrarThumbImage(BitmapImage imgThumb)
+        private void DrawThumbImage(BitmapImage imgThumb)
         {
             Image image = new Image();
             image.Source = imgThumb;
@@ -89,8 +90,7 @@ namespace Verde
             Canvas.SetLeft(image, this.posCurrent.X);
             Canvas.SetTop(image, this.posCurrent.Y);
             this.posCurrent.Y += image.Height + 8;
-            if (this.posCurrent.Y > this.canvasMain.ActualHeight - image.Height)
-            {
+            if (this.posCurrent.Y > this.canvasMain.ActualHeight - image.Height) {
                 this.posCurrent.X += image.Width + 8;
                 this.posCurrent.Y = 16;
             }
@@ -101,6 +101,19 @@ namespace Verde
         private void CheckPath(string strPath)
         {
             Console.WriteLine(strPath);
+        }
+
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            DoubleAnimation myDoubleAnimation = new DoubleAnimation(0.0, 1.0, new Duration(TimeSpan.FromSeconds(10)), FillBehavior.Stop);
+            myDoubleAnimation.Completed += new EventHandler(myDoubleAnimation_Completed);
+            canvasSettings.BeginAnimation(Rectangle.OpacityProperty, myDoubleAnimation);
+            canvasSettings.Visibility = Visibility.Visible;
+        }
+
+        void myDoubleAnimation_Completed(object sender, EventArgs e)
+        {
+            canvasSettings.Opacity = 1.0;
         }
     }
 }

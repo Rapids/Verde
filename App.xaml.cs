@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace Verde
+namespace Verde.Utility
 {
     /// <summary>
     /// App.xaml の相互作用ロジック
