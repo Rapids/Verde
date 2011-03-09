@@ -24,17 +24,18 @@ namespace Verde
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ExternalCacheDatabase dbCache;
+        private ExternalCacheDatabase dbImageCache;
         private Point posCurrent;
         private bool bLargeThumb = true;
         private bool bDisplaySettings = false;
+        private static double nStartPos = 56;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            this.dbCache = new ExternalCacheDatabase();
-            this.posCurrent = new Point(16, 16);
+            this.dbImageCache = new ExternalCacheDatabase();
+            this.posCurrent = new Point(16, MainWindow.nStartPos);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
@@ -56,7 +57,7 @@ namespace Verde
                         if (StringProcessing.IsHexadecimal(strBgValue) == true) {
                             SolidColorBrush brsBackground = new SolidColorBrush();
                             brsBackground.Color = StringProcessing.ConvertFromHexStringToColor(strBgValue);
-                            this.canvasGlobal.Background = brsBackground;
+                            this.canvasMain.Background = brsBackground;
                         }
                     }
                 }
@@ -73,8 +74,8 @@ namespace Verde
                             }
                             strUrl = "http://pya.cc" + strUrl;
                         }
-                        this.dbCache.GetCache(strUrl, CheckPath);
-                        this.dbCache.GetImageCache(strUrl, this.DrawThumbImage);
+                        this.dbImageCache.GetCache(strUrl, CheckPath);
+                        this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
                     }
                 }
             }
@@ -82,20 +83,35 @@ namespace Verde
 
         private void DrawThumbImage(BitmapImage imgThumb)
         {
+            // TENTATIVE
+            if (this.posCurrent.X > 16) return;
+
             Image image = new Image();
             image.Source = imgThumb;
-            image.Width = imgThumb.PixelWidth;
+            image.Width  = imgThumb.PixelWidth;
             image.Height = imgThumb.PixelHeight;
 
             Canvas.SetLeft(image, this.posCurrent.X);
             Canvas.SetTop(image, this.posCurrent.Y);
-            this.posCurrent.Y += image.Height + 8;
-            if (this.posCurrent.Y > this.canvasMain.ActualHeight - image.Height) {
-                this.posCurrent.X += image.Width + 8;
-                this.posCurrent.Y = 16;
-            }
+            this.posCurrent.Y += image.Height + 16;
+
+            Rectangle rect = new Rectangle();
+            rect.Name = "rect" + imgThumb.UriSource.Segments.Last<String>();
+            rect.Width = this.canvasMain.Width - 16;
+            rect.Height = image.Height + 16;
+            rect.Stroke = Brushes.Gray;
+            rect.RadiusX = 4;
+            rect.RadiusY = 4;
+            Canvas.SetLeft(rect, this.posCurrent.X - 8);
+            Canvas.SetTop(rect, this.posCurrent.Y - image.Height - 24);
+            this.canvasMain.Children.Add(rect);
 
             this.canvasMain.Children.Add(image);
+
+            if (this.posCurrent.Y > this.canvasMain.ActualHeight - image.Height) {
+                this.posCurrent.X += image.Width + 8;
+                this.posCurrent.Y = MainWindow.nStartPos;
+            }
         }
 
         private void CheckPath(string strPath)
@@ -107,13 +123,12 @@ namespace Verde
         {
             Canvas.SetZIndex(canvasSettings, 2);
             canvasSettings.Opacity = (bDisplaySettings)? 1.0: 0.0;
-            DoubleAnimation myDoubleAnimation = new DoubleAnimation(canvasSettings.Opacity, (bDisplaySettings) ? 0.0 : 1.0, new Duration(TimeSpan.FromSeconds(0.2)), FillBehavior.HoldEnd);
-            myDoubleAnimation.Completed += new EventHandler(myDoubleAnimation_Completed);
-            canvasSettings.BeginAnimation(Rectangle.OpacityProperty, myDoubleAnimation);
-            //canvasSettings.Visibility = Visibility.Visible;
+            DoubleAnimation animFader = new DoubleAnimation(canvasSettings.Opacity, (bDisplaySettings) ? 0.0 : 1.0, new Duration(TimeSpan.FromSeconds(0.2)), FillBehavior.HoldEnd);
+            animFader.Completed += new EventHandler(OnCompletedFader);
+            canvasSettings.BeginAnimation(Rectangle.OpacityProperty, animFader);
         }
 
-        void myDoubleAnimation_Completed(object sender, EventArgs e)
+        private void OnCompletedFader(object sender, EventArgs e)
         {
             bDisplaySettings = !bDisplaySettings;
         }

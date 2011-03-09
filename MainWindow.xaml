@@ -4,9 +4,9 @@
     Title="Verde" Icon="/Verde;component/favicon.ico" SizeToContent="WidthAndHeight" ResizeMode="NoResize" ShowInTaskbar="True">
     <Grid>
         <Button Height="23" HorizontalAlignment="Right" Name="btnQuery" VerticalAlignment="Bottom" Width="75" Click="btnQuery_Click">Query</Button>
-        <Canvas Name="canvasGlobal" Margin="0,0,0,24" MinWidth="480" MinHeight="800" Background="#FF9CCE9C">
-            <Canvas Name="canvasMain" Canvas.ZIndex="1" Canvas.Left="0" Canvas.Bottom="0" Height="800" MinHeight="800" MinWidth="480" Width="480" />
-            <Canvas Name="canvasSettings" Canvas.ZIndex="0" Canvas.Left="0" Canvas.Bottom="0" Height="800" MinHeight="800" MinWidth="480" Width="480" Background="AliceBlue"/>
+        <Canvas Name="canvasGlobal" Margin="0,0,0,24" MinWidth="480" MinHeight="800" Background="White">
+            <Canvas Name="canvasMain" Canvas.ZIndex="1" Canvas.Left="0" Canvas.Bottom="0" Height="800" MinHeight="800" MinWidth="480" Width="480" Background="#FF9CCE9C"></Canvas>
+            <Canvas Name="canvasSettings" Canvas.ZIndex="0" Canvas.Left="0" Canvas.Bottom="0" Height="800" MinHeight="800" MinWidth="480" Width="480" Background="#FF9CCE9C"/>
         </Canvas>
         <Button Height="23" HorizontalAlignment="Right" Margin="0,0,85,0" Name="btnTest" VerticalAlignment="Bottom" Width="75" Click="btnTest_Click">Test</Button>
     </Grid>
