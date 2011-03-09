@@ -8,7 +8,7 @@
     <ProjectGuid>{B7E9D393-37C2-4B4D-AC25-C9B32B4DE6E6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Verde.Utility</RootNamespace>
+    <RootNamespace>Verde</RootNamespace>
     <AssemblyName>Verde</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -95,6 +95,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Utility\CanvasManager.cs" />
     <Compile Include="Utility\HtmlParser.cs" />
     <Compile Include="Utility\ImageCache.cs" />
     <Compile Include="Utility\StringProcessing.cs" />
