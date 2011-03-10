@@ -38,8 +38,8 @@ namespace Verde
             this.mngCanvas = new CanvasManager();
             this.posCurrent = new Point(16, MainWindow.nStartPos);
 
-            this.mngCanvas.Add("Main", this.canvasMain);
-            this.mngCanvas.Add("Settings", this.canvasSettings);
+            this.mngCanvas.Add("Main", this.canvasMain, CanvasManager.Order.ORDER_FOREGROUND);
+            this.mngCanvas.Add("Settings", this.canvasSettings, CanvasManager.Order.ORDER_BACKGROUND);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)

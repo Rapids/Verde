@@ -12,8 +12,16 @@ namespace Verde.Utility
 {
     class CanvasManager
     {
+        public enum Order {
+            ORDER_BACKGROUND = 0,
+            ORDER_FOREGROUND = 1,
+            ORDER_FADING     = 2,
+        };
+
         private static int nBackgroundZ = 0;
         private static int nForegroundZ = 1;
+        private static int nFadingZ     = 2;
+        private static int nExpertZ = 3;
         private Dictionary<string, Canvas> dicCanvas = null;
         private Canvas canvasFading = null;
 
@@ -22,18 +30,19 @@ namespace Verde.Utility
             dicCanvas = new Dictionary<string, Canvas>();
         }
 
-        public void Add(string keyword, Canvas canvas)
+        public void Add(string keyword, Canvas canvas, Order order)
         {
             dicCanvas.Add(keyword, canvas);
+            Canvas.SetZIndex(canvas, (int)order);
         }
 
         public void Raise(string keyword)
         {
             foreach (var item in this.dicCanvas) {
                 if (item.Key.Equals(keyword)) {
-                    if (Canvas.GetZIndex(item.Value) == CanvasManager.nForegroundZ) {
-                        return; // no processing
-                    }
+                    //if (Canvas.GetZIndex(item.Value) == CanvasManager.nForegroundZ) {
+                    //    return; // no processing
+                    //}
                     //Canvas.SetZIndex(canvas, CanvasManager.nForegroundZ);
                     //DoubleAnimation animFader = new DoubleAnimation(0.0, 1.0, new Duration(TimeSpan.FromMilliseconds(200)), FillBehavior.HoldEnd);
                     //canvas.BeginAnimation(Rectangle.OpacityProperty, animFader);
@@ -43,8 +52,9 @@ namespace Verde.Utility
                     if (Canvas.GetZIndex(item.Value) == CanvasManager.nForegroundZ) {
                         DoubleAnimation animFader = new DoubleAnimation(1.0, 0.0, new Duration(TimeSpan.FromMilliseconds(500)), FillBehavior.HoldEnd);
                         animFader.Completed += new EventHandler(OnCompletedFader);
-                        item.Value.BeginAnimation(Rectangle.OpacityProperty, animFader);
                         this.canvasFading = item.Value;
+                        Canvas.SetZIndex(this.canvasFading, CanvasManager.nFadingZ);
+                        item.Value.BeginAnimation(Rectangle.OpacityProperty, animFader);
                     }
                 }
             }
@@ -53,7 +63,7 @@ namespace Verde.Utility
         private void OnCompletedFader(object sender, EventArgs e)
         {
             Canvas.SetZIndex(this.canvasFading, CanvasManager.nBackgroundZ);
-            this.canvasFading.Opacity = 1.0;
+            //this.canvasFading.Opacity = 1.0;
             this.canvasFading = null;
         }
     }
