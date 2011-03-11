@@ -40,6 +40,14 @@ namespace Verde
 
             this.mngCanvas.Add("Main", this.canvasMain, CanvasManager.Order.ORDER_FOREGROUND);
             this.mngCanvas.Add("Settings", this.canvasSettings, CanvasManager.Order.ORDER_BACKGROUND);
+
+            var p = new Paragraph();
+            p.Inlines.Add("この文字は");
+            var span = new Span { Foreground = Brushes.Red };
+            span.Inlines.Add("赤");
+            p.Inlines.Add(span);
+            p.Inlines.Add("です。");
+            this.rtboxSettings.Document.Blocks.Add(p);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
