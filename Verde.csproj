@@ -96,6 +96,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utility\CanvasManager.cs" />
+    <Compile Include="Utility\ElementsContainer.cs" />
+    <Compile Include="Utility\HeadingElement.cs" />
     <Compile Include="Utility\HtmlParser.cs" />
     <Compile Include="Utility\ImageCache.cs" />
     <Compile Include="Utility\StringProcessing.cs" />
