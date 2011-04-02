@@ -9,22 +9,34 @@ namespace Verde.Utility
 {
     class Element
     {
+        public enum Type
+        {
+            UNKNOWN,
+            PHOTO,
+            VIDEO,
+            TEXT,
+            FLASH,
+            EROINA
+        }
+
         public static string strKeyword = "pyaimg-list";
         private static bool bLargeThumb = true;
 
         public string UrlEntry { set; get; }
         public string UrlThumbnail { set; get; }
-        public Int64 Number { set; get; }
-        public string Type { set; get; }
+        public Int64 ImageID { set; get; }
+        public Type ImageType { set; get; }
         public string Title { set; get; }
         public string Poster { set; get; }
         public int Good { set; get; }
         public int Bad { set; get; }
         public int Comment { set; get; }
         public int Pickup { set; get; }
+        public List<int> Counts { set; get; }
 
         public Element()
         {
+            this.Counts = new List<int>();
         }
 
         public void Import(XElement xmlElement)
@@ -33,6 +45,7 @@ namespace Verde.Utility
             foreach (var item in xmlElement.Descendants()) {
                 if (item.Name.Equals(HtmlParser.nsXhtml + "a")) {
                     this.UrlEntry = item.Attribute("href").Value;
+                    this.ImageID = Int64.Parse(this.UrlEntry.Substring(this.UrlEntry.LastIndexOf('=') + 1));
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "img") && item.Attribute("class").Value == "thumb") {
                     string strUrl = item.Attribute("src").Value;
                     if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
@@ -40,21 +53,42 @@ namespace Verde.Utility
                             /* 現状決め打ち "/i"を除外する */
                             strUrl = strUrl.Substring(2);
                         }
-                        strUrl = "http://pya.cc" + strUrl;
+                        //strUrl = "http://pya.cc" + strUrl;
                     }
                     this.UrlThumbnail = strUrl;
                     //this.dbImageCache.GetCache(strUrl, this.CheckPath);
                     //this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
-                } else if (item.Name.Equals(HtmlParser.nsXhtml + "span") && item.Attribute("class").Value == "block") {
-                    List<int> listNumbers = new List<int>();
-                    switch (nCount++) {
-                        case 0: this.Type = this.GetLastWord(item.Value); break;
-                        case 1: this.Title = this.GetInnerWord(item.Value, '「', '」'); break;
-                        case 2: this.Poster = this.GetDelimitedWord(item.Value, ':'); break;
-                        case 3: this.GetNumbers(item.Value, ':', listNumbers); break;
+                } else if (item.Name.Equals(HtmlParser.nsXhtml + "span")) {
+                    XAttribute attr = item.Attribute("class");
+                    if (attr != null && attr.Value == "block") {
+                        switch (nCount++) {
+                            case 0: this.ImageType = this.GetType(this.GetLastWord(item.Value)); break;
+                            case 1: this.Title = this.GetInnerWord(item.Value, '「', '」'); break;
+                            case 2: this.Poster = this.GetDelimitedWord(item.Value, ':'); break;
+                            case 3: this.GetNumbers(item.Value, ':', this.Counts); break;
+                        }
                     }
                 }
             }
+        }
+
+        Type GetType(string strType)
+        {
+            Type typeRet = Type.UNKNOWN;
+
+            if (strType == "Photo") {
+                typeRet = Type.PHOTO;
+            } else if (strType == "Video") {
+                typeRet = Type.VIDEO;
+            } else if (strType == "Text") {
+                typeRet = Type.TEXT;
+            } else if (strType == "Flash") {
+                typeRet = Type.FLASH;
+            } else if (strType == "Eroina") {
+                typeRet = Type.EROINA;
+            }
+
+            return typeRet;
         }
 
         private string GetInnerWord(string strWord, char cBegin, char cEnd)
@@ -84,16 +118,16 @@ namespace Verde.Utility
         {
             string strTmp = strWords;
             for (;;) {
-                int nPos = strTmp.IndexOf(cDelimiter);
-                if (nPos == 0) break;
+                var nPos = strTmp.IndexOf(cDelimiter);
+                if (nPos < 0) break;
                 string strNumber = strTmp.Substring(nPos + 1);
-                for (var i = 0; i < strNumber.Length; i++) {
-                    strNumber = strNumber.Substring(0, strWords.Length - i);
+                for (var i = 0; strNumber.Length > 0; i++) {
                     if (Regex.IsMatch(strNumber, @"^[0-9]+$") == true) {
                         listNumbers.Add(int.Parse(strNumber));
-                        strTmp = strTmp.Substring(strWords.Length - i);
+                        strTmp = strTmp.Substring(strTmp.Length - i);
                         break;
                     }
+                    strNumber = strNumber.Substring(0, strNumber.Length - 1);
                 }
             }
         }

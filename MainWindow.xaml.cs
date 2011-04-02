@@ -71,27 +71,8 @@ namespace Verde
             //    }
             //}
 
-            this.ecAllPages.ImportPage(1);
-
-            // Extract Thumbnails
-            //foreach (var itemEelement in xmlHome.Descendants(HtmlParser.nsXhtml + "li")) {
-            //    XAttribute attrElement = itemEelement.Attribute("class");
-            //    foreach (var itemThumb in itemEelement.Descendants(HtmlParser.nsXhtml + "img")) {
-            //        XAttribute attrThumb = itemThumb.Attribute("class");
-            //        if (attrThumb != null && attrThumb.Value == "thumb") {
-            //            string strUrl = itemThumb.Attribute("src").Value;
-            //            if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
-            //                if (bLargeThumb == true) {
-            //                    /* 現状決め打ち "/i"を除外する */
-            //                    strUrl = strUrl.Substring(2);
-            //                }
-            //                strUrl = "http://pya.cc" + strUrl;
-            //            }
-            //            this.dbImageCache.GetCache(strUrl, CheckPath);
-            //            this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
-            //        }
-            //    }
-            //}
+            //this.ecAllPages.ImportPage(1);
+            this.ecAllPages.ImportPages(1, 10);
 
             Mouse.OverrideCursor = curCurrent;
         }
