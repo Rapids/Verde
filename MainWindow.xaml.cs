@@ -7,9 +7,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Shapes;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Net;
 using System.IO;
 using System.Xml.Linq;
@@ -29,6 +29,7 @@ namespace Verde
         private bool bDisplaySettings = false;
         private static double nStartPos = 56;
         private string strHomeUrl = "http://pya.cc/ipn/index.php?page=";
+        //private BitmapImage bmpSplash;
 
         public MainWindow()
         {
@@ -42,13 +43,16 @@ namespace Verde
             this.mngCanvas.Add("Main", this.canvasMain, CanvasManager.Order.ORDER_FOREGROUND);
             this.mngCanvas.Add("Settings", this.canvasSettings, CanvasManager.Order.ORDER_BACKGROUND);
 
-            var p = new Paragraph();
-            p.Inlines.Add("この文字は");
-            var span = new Span { Foreground = Brushes.Red };
-            span.Inlines.Add("赤");
-            p.Inlines.Add(span);
-            p.Inlines.Add("です。");
-            this.rtboxSettings.Document.Blocks.Add(p);
+            //var p = new Paragraph();
+            //p.Inlines.Add("この文字は");
+            //var span = new Span { Foreground = Brushes.Red };
+            //span.Inlines.Add("赤");
+            //p.Inlines.Add(span);
+            //p.Inlines.Add("です。");
+            //this.rtboxSettings.Document.Blocks.Add(p);
+
+            //this.bmpSplash = new BitmapImage(new Uri("Resources/Verde.png", UriKind.Relative));
+            //ImageProcessing.DrawImageToCenter(this.canvasMain, this.bmpSplash);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
@@ -56,23 +60,13 @@ namespace Verde
             Cursor curCurrent = Mouse.OverrideCursor;
             Mouse.OverrideCursor = Cursors.Wait;
 
-            // Set Background Color from style
-            //string strStyle = xmlHome.Root.Element(HtmlParser.nsXhtml + "body").Attribute("style").Value;
-            //string strBackground = "background-color:#";
-            //if (String.Compare(strBackground, 0, strStyle, 0, strBackground.Length, true) == 0) {
-            //    string strBgValue = strStyle.Substring(strBackground.Length, strStyle.Length - strBackground.Length);
-            //    if (strBgValue.Length >= 6) {
-            //        strBgValue = strBgValue.Substring(0, 6);
-            //        if (StringProcessing.IsHexadecimal(strBgValue) == true) {
-            //            SolidColorBrush brsBackground = new SolidColorBrush();
-            //            brsBackground.Color = StringProcessing.ConvertFromHexStringToColor(strBgValue);
-            //            this.canvasMain.Background = brsBackground;
-            //        }
-            //    }
-            //}
-
             //this.ecAllPages.ImportPage(1);
             this.ecAllPages.ImportPages(1, 10);
+
+            // Set Background Color
+            SolidColorBrush brsBackground = new SolidColorBrush();
+            brsBackground.Color = this.ecAllPages.BackgroundColor;
+            this.canvasMain.Background = brsBackground;
 
             Mouse.OverrideCursor = curCurrent;
         }

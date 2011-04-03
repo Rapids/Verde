@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using System.Windows.Media;
 
 namespace Verde.Utility
 {
@@ -28,10 +29,6 @@ namespace Verde.Utility
         public Type ImageType { set; get; }
         public string Title { set; get; }
         public string Poster { set; get; }
-        public int Good { set; get; }
-        public int Bad { set; get; }
-        public int Comment { set; get; }
-        public int Pickup { set; get; }
         public List<int> Counts { set; get; }
 
         public Element()
@@ -57,7 +54,7 @@ namespace Verde.Utility
                     }
                     this.UrlThumbnail = strUrl;
                     //this.dbImageCache.GetCache(strUrl, this.CheckPath);
-                    //this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
+                    //this.dbImageCache.GetImageCache(strUrl, this.SetThumbImage);
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "span")) {
                     XAttribute attr = item.Attribute("class");
                     if (attr != null && attr.Value == "block") {
@@ -131,6 +128,15 @@ namespace Verde.Utility
                 }
             }
         }
+
+        //private void CheckPath(string strPath)
+        //{
+        //    //Console.WriteLine(strPath);
+        //}
+
+        //private void SetThumbImage(BitmapImage imgThumb)
+        //{
+        //}
     }
 
     class ElementsPack // contains elements on a page
@@ -164,6 +170,9 @@ namespace Verde.Utility
         private List<Element> listAllElements;
         private string strBaseUrl;
 
+        private bool bSetBackgroundColor = false;
+        public Color BackgroundColor { set; get; }
+
         public ElementsContainer(string strBaseUrl)
         {
             this.listElementsPack = new Dictionary<int, ElementsPack>();
@@ -179,12 +188,33 @@ namespace Verde.Utility
 
             epNew.Import(xmlPage);
             this.listElementsPack.Add(nPage, epNew);
+
+            this.CheckBackgroundColor(xmlPage);
         }
 
         public void ImportPages(int nPageMin, int nPageMax)
         {
             for (var i = nPageMin; i <= nPageMax; i++) {
                 this.ImportPage(i);
+            }
+        }
+
+        private void CheckBackgroundColor(XDocument xmlPage)
+        {
+            if (this.bSetBackgroundColor) return;
+
+            // Check Background Color from style
+            string strStyle = xmlPage.Root.Element(HtmlParser.nsXhtml + "body").Attribute("style").Value;
+            string strBackground = "background-color:#";
+            if (String.Compare(strBackground, 0, strStyle, 0, strBackground.Length, true) == 0) {
+                string strBgValue = strStyle.Substring(strBackground.Length, strStyle.Length - strBackground.Length);
+                if (strBgValue.Length >= 6) {
+                    strBgValue = strBgValue.Substring(0, 6);
+                    if (StringProcessing.IsHexadecimal(strBgValue) == true) {
+                        this.BackgroundColor = StringProcessing.ConvertFromHexStringToColor(strBgValue);
+                        this.bSetBackgroundColor = true;
+                    }
+                }
             }
         }
     }
