@@ -21,7 +21,6 @@ namespace Verde.Utility
         private static int nBackgroundZ = 0;
         private static int nForegroundZ = 1;
         private static int nFadingZ     = 2;
-        private static int nExpertZ = 3;
         private Dictionary<string, Canvas> dicCanvas = null;
         private KeyValuePair<string, Canvas> canvasFading;
 

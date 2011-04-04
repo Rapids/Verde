@@ -29,7 +29,8 @@ namespace Verde
         private bool bDisplaySettings = false;
         private static double nStartPos = 56;
         private string strHomeUrl = "http://pya.cc/ipn/index.php?page=";
-        //private BitmapImage bmpSplash;
+        private Image imgSplash;
+        private AnimationGif gifLoading;
 
         public MainWindow()
         {
@@ -51,8 +52,11 @@ namespace Verde
             //p.Inlines.Add("です。");
             //this.rtboxSettings.Document.Blocks.Add(p);
 
-            //this.bmpSplash = new BitmapImage(new Uri("Resources/Verde.png", UriKind.Relative));
-            //ImageProcessing.DrawImageToCenter(this.canvasMain, this.bmpSplash);
+            this.imgSplash = ImageProcessing.GetStillImageFromResource("Verde.Resources.Verde.png");
+            ImageProcessing.SetImageToCenter(this.canvasMain, this.imgSplash);
+
+            this.gifLoading = new AnimationGif("Verde.Resources.loading.gif", 100);
+            ImageProcessing.SetImage(this.canvasMain, new Point(10, 10), this.gifLoading.FrameImage);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
