@@ -55,7 +55,7 @@ namespace Verde
             this.imgSplash = ImageProcessing.GetStillImageFromResource("Verde.Resources.Verde.png");
             ImageProcessing.SetImageToCenter(this.canvasMain, this.imgSplash);
 
-            this.gifLoading = new AnimationGif("Verde.Resources.loading.gif", 100);
+            this.gifLoading = new AnimationGif("Verde.Resources.loading.gif");
             ImageProcessing.SetImage(this.canvasMain, new Point(10, 10), this.gifLoading.FrameImage);
         }
 

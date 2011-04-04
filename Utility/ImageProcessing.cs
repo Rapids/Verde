@@ -27,7 +27,7 @@ namespace Verde.Utility
             canvas.Children.Add(image);
         }
 
-        public static BitmapDecoder GetMultiImageFromResource(string strImagePath)
+        public static BitmapDecoder CreateBitmapDecoderFromResource(string strImagePath)
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var stmImage = assembly.GetManifestResourceStream(strImagePath);
@@ -37,7 +37,7 @@ namespace Verde.Utility
 
         public static Image GetStillImageFromResource(string strImagePath)
         {
-            var frameImage = ImageProcessing.GetMultiImageFromResource(strImagePath).Frames.First();
+            var frameImage = ImageProcessing.CreateBitmapDecoderFromResource(strImagePath).Frames.First();
 
             Image image = new Image();
             image.Source = frameImage;
@@ -46,38 +46,63 @@ namespace Verde.Utility
 
             return image;
         }
+
+        public static GifBitmapDecoder CreateGifBitmapDecoderFromResource(string strImagePath, out Stream stmImage)
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            stmImage = assembly.GetManifestResourceStream(strImagePath);
+
+            return new GifBitmapDecoder(stmImage, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+        }
     }
 
     class AnimationGif
     {
         private DispatcherTimer timerInterval = null;
-        private BitmapDecoder decAnimationGif;
+        private GifBitmapDecoder decAnimationGif;
         private int idxFrame = 0;
+        private int[] arrDelays;
+        private int nLoop;
 
-        public Image FrameImage { set; get; }
+        private Image imgFrame = null;
+        public Image FrameImage { get { return this.imgFrame; } }
 
-        public AnimationGif(string strImagePath, int nInterval)
+        public AnimationGif(string strImagePath)
         {
-            this.decAnimationGif = ImageProcessing.GetMultiImageFromResource(strImagePath);
+            Stream stmImage;
+            this.decAnimationGif = ImageProcessing.CreateGifBitmapDecoderFromResource(strImagePath, out stmImage);
+
+            stmImage.Seek(0, SeekOrigin.Begin);
+            var tmpImage = new System.Drawing.Bitmap(stmImage);
+            var piFrameDelay = tmpImage.GetPropertyItem(0x5100);
+            this.arrDelays = new int[this.decAnimationGif.Frames.Count];
+            for (int i = 0; i < this.arrDelays.Length; i++) {
+                this.arrDelays[i] = BitConverter.ToInt32(piFrameDelay.Value, i * 4) * 10;
+            }
+            var piLoopCount = tmpImage.GetPropertyItem(0x5101);
+            this.nLoop = BitConverter.ToInt16(piLoopCount.Value, 0);
+
             BitmapFrame frame = this.decAnimationGif.Frames.First();
+            this.imgFrame = new Image();
+            this.imgFrame.Source = frame;
+            this.imgFrame.Stretch = Stretch.None;
+            this.imgFrame.Width = frame.PixelWidth;
+            this.imgFrame.Height = frame.PixelHeight;
 
-            this.FrameImage = new Image();
-            this.FrameImage.Width = frame.PixelWidth;
-            this.FrameImage.Height = frame.PixelHeight;
-
-            timerInterval = new DispatcherTimer();
-            timerInterval.Interval = new TimeSpan(0, 0, 0, 0, nInterval);
-            timerInterval.Tick += new EventHandler(AnimationHandler);
-            timerInterval.Start();
+            this.timerInterval = new DispatcherTimer();
+            this.timerInterval.Interval = new TimeSpan(0, 0, 0, 0, this.arrDelays[0]);
+            this.timerInterval.Tick += new EventHandler(AnimationHandler);
+            this.timerInterval.Start();
         }
 
         private void AnimationHandler(object sender, EventArgs e)
         {
-            if (++idxFrame >= this.decAnimationGif.Frames.Count) {
-                idxFrame = 0;
+            if (++this.idxFrame >= this.decAnimationGif.Frames.Count) {
+                this.idxFrame = 0;
             }
 
-            this.FrameImage.Source = this.decAnimationGif.Frames[idxFrame];
+            this.FrameImage.Source = this.decAnimationGif.Frames[this.idxFrame];
+            this.timerInterval.Interval = new TimeSpan(0, 0, 0, 0, this.arrDelays[this.idxFrame]);
         }
     }
 }
