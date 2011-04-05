@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 
 namespace Verde.Utility
 {
@@ -54,6 +55,15 @@ namespace Verde.Utility
 
             return new GifBitmapDecoder(stmImage, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
         }
+
+        public static void FadeOut(Image image, double nFadeTime, EventHandler OnCompleted)
+        {
+            DoubleAnimation animFader = new DoubleAnimation(1.0, 0.0, new Duration(TimeSpan.FromMilliseconds(nFadeTime)), FillBehavior.HoldEnd);
+            if (OnCompleted != null) {
+                animFader.Completed += new EventHandler(OnCompleted);
+            }
+            image.BeginAnimation(Rectangle.OpacityProperty, animFader);
+        }
     }
 
     class AnimationGif
@@ -63,6 +73,7 @@ namespace Verde.Utility
         private int idxFrame = 0;
         private int[] arrDelays;
         private int nLoop;
+        private int nLoopRemain;
 
         private Image imgFrame = null;
         public Image FrameImage { get { return this.imgFrame; } }
@@ -81,6 +92,7 @@ namespace Verde.Utility
             }
             var piLoopCount = tmpImage.GetPropertyItem(0x5101);
             this.nLoop = BitConverter.ToInt16(piLoopCount.Value, 0);
+            this.nLoopRemain = this.nLoop;
 
             BitmapFrame frame = this.decAnimationGif.Frames.First();
             this.imgFrame = new Image();
@@ -99,6 +111,11 @@ namespace Verde.Utility
         {
             if (++this.idxFrame >= this.decAnimationGif.Frames.Count) {
                 this.idxFrame = 0;
+                if (this.nLoop > 0) {
+                    if (--this.nLoopRemain < 0) {
+                        this.timerInterval.Stop();
+                    }
+                }
             }
 
             this.FrameImage.Source = this.decAnimationGif.Frames[this.idxFrame];

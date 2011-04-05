@@ -142,6 +142,7 @@ namespace Verde.Utility
     class ElementsPack // contains elements on a page
     {
         private List<Element> listElements;
+        public List<Element> Elements { get { return this.listElements; } }
 
         public ElementsPack()
         {
@@ -168,6 +169,7 @@ namespace Verde.Utility
     {
         private Dictionary<int, ElementsPack> listElementsPack;
         private List<Element> listAllElements;
+        public List<Element> Elements { get { return this.listAllElements; } }
         private string strBaseUrl;
 
         private bool bSetBackgroundColor = false;
@@ -188,6 +190,7 @@ namespace Verde.Utility
 
             epNew.Import(xmlPage);
             this.listElementsPack.Add(nPage, epNew);
+            this.listAllElements.AddRange(epNew.Elements);
 
             this.CheckBackgroundColor(xmlPage);
         }

@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Shapes;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.ComponentModel;
 using System.Net;
 using System.IO;
 using System.Xml.Linq;
@@ -28,8 +29,10 @@ namespace Verde
         private Point posCurrent;
         private bool bDisplaySettings = false;
         private static double nStartPos = 56;
+        private static Point posLoadingGif = new Point(10, 10);
         private string strHomeUrl = "http://pya.cc/ipn/index.php?page=";
         private Image imgSplash;
+        private Cursor curBackingStore;
         private AnimationGif gifLoading;
 
         public MainWindow()
@@ -56,23 +59,42 @@ namespace Verde
             ImageProcessing.SetImageToCenter(this.canvasMain, this.imgSplash);
 
             this.gifLoading = new AnimationGif("Verde.Resources.loading.gif");
-            ImageProcessing.SetImage(this.canvasMain, new Point(10, 10), this.gifLoading.FrameImage);
         }
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
         {
-            Cursor curCurrent = Mouse.OverrideCursor;
-            Mouse.OverrideCursor = Cursors.Wait;
+            var bgWorker = new BackgroundWorker();
+            bgWorker.DoWork += new DoWorkEventHandler(DoImportPages);
+            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnImportCompleted);
 
+            this.curBackingStore = Mouse.OverrideCursor;
+            Mouse.OverrideCursor = Cursors.Wait;
+            ImageProcessing.SetImage(this.canvasMain, MainWindow.posLoadingGif, this.gifLoading.FrameImage);
+
+            bgWorker.RunWorkerAsync();
+        }
+
+        private void DoImportPages(object sender, DoWorkEventArgs e)
+        {
             //this.ecAllPages.ImportPage(1);
             this.ecAllPages.ImportPages(1, 10);
 
             // Set Background Color
-            SolidColorBrush brsBackground = new SolidColorBrush();
-            brsBackground.Color = this.ecAllPages.BackgroundColor;
-            this.canvasMain.Background = brsBackground;
+            //SolidColorBrush brsBackground = new SolidColorBrush();
+            //brsBackground.Color = this.ecAllPages.BackgroundColor;
+            //this.canvasMain.Background = brsBackground;
+        }
 
-            Mouse.OverrideCursor = curCurrent;
+        private void OnImportCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            ImageProcessing.FadeOut(this.gifLoading.FrameImage, 100, null);
+            ImageProcessing.FadeOut(this.imgSplash, 500, this.OnCompletedFader);
+            Mouse.OverrideCursor = this.curBackingStore;
+        }
+
+        private void OnCompletedFader(object sender, EventArgs e)
+        {
+            this.imgSplash = null;
         }
 
         private void CheckPath(string strPath)
