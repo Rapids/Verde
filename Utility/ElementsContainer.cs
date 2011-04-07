@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Media;
+using System.Windows.Documents;
 
 namespace Verde.Utility
 {
@@ -59,10 +59,10 @@ namespace Verde.Utility
                     XAttribute attr = item.Attribute("class");
                     if (attr != null && attr.Value == "block") {
                         switch (nCount++) {
-                            case 0: this.ImageType = this.GetType(this.GetLastWord(item.Value)); break;
-                            case 1: this.Title = this.GetInnerWord(item.Value, '「', '」'); break;
-                            case 2: this.Poster = this.GetDelimitedWord(item.Value, ':'); break;
-                            case 3: this.GetNumbers(item.Value, ':', this.Counts); break;
+                            case 0: this.ImageType = this.GetType(StringProcessing.GetLastWord(item.Value)); break;
+                            case 1: this.Title = StringProcessing.GetInnerWord(item.Value, '「', '」'); break;
+                            case 2: this.Poster = StringProcessing.GetDelimitedWord(item.Value, ':'); break;
+                            case 3: StringProcessing.GetNumbers(item.Value, ':', this.Counts); break;
                         }
                     }
                 }
@@ -88,47 +88,6 @@ namespace Verde.Utility
             return typeRet;
         }
 
-        private string GetInnerWord(string strWord, char cBegin, char cEnd)
-        {
-            int nBegin = strWord.IndexOf(cBegin) + 1;
-            int nEnd = strWord.IndexOf(cEnd);
-            return strWord.Substring(nBegin, nEnd - nBegin);
-        }
-
-        private string GetLastWord(string strWords)
-        {
-            for (var i = 1; i < strWords.Length; i++) {
-                string strRet = strWords.Substring(strWords.Length - i);
-                if (Regex.IsMatch(strRet, @"^[a-zA-Z0-9]+$") == false) {
-                    return strRet.Substring(1);
-                }
-            }
-            return string.Empty;
-        }
-
-        private string GetDelimitedWord(string strWords, char cDelimiter)
-        {
-            return strWords.Substring(strWords.IndexOf(cDelimiter) + 1);
-        }
-
-        private void GetNumbers(string strWords, char cDelimiter, List<int> listNumbers)
-        {
-            string strTmp = strWords;
-            for (;;) {
-                var nPos = strTmp.IndexOf(cDelimiter);
-                if (nPos < 0) break;
-                string strNumber = strTmp.Substring(nPos + 1);
-                for (var i = 0; strNumber.Length > 0; i++) {
-                    if (Regex.IsMatch(strNumber, @"^[0-9]+$") == true) {
-                        listNumbers.Add(int.Parse(strNumber));
-                        strTmp = strTmp.Substring(strTmp.Length - i);
-                        break;
-                    }
-                    strNumber = strNumber.Substring(0, strNumber.Length - 1);
-                }
-            }
-        }
-
         //private void CheckPath(string strPath)
         //{
         //    //Console.WriteLine(strPath);
@@ -137,6 +96,54 @@ namespace Verde.Utility
         //private void SetThumbImage(BitmapImage imgThumb)
         //{
         //}
+
+        public Paragraph MakeParagraph()
+        {
+            Paragraph p = new Paragraph();
+            p.Inlines.Add("Title : ");
+            var span = new Span { Foreground = Brushes.BlueViolet };
+            span.Inlines.Add(this.Title);
+            p.Inlines.Add(span);
+            p.Inlines.Add("\n");
+
+            p.Inlines.Add("Poster : ");
+            span = new Span { Foreground = Brushes.Brown };
+            span.Inlines.Add(this.Poster);
+            p.Inlines.Add(span);
+            p.Inlines.Add("\n");
+
+            p.Inlines.Add("imgid : ");
+            span = new Span { Foreground = Brushes.BurlyWood };
+            span.Inlines.Add(string.Format("{0}", this.ImageID));
+            p.Inlines.Add(span);
+            p.Inlines.Add("\n");
+
+            string strUrl = "http://pya.cc" + this.UrlEntry;
+            p.Inlines.Add("URL : ");
+            span = new Span { Foreground = Brushes.BurlyWood };
+            var link = new Hyperlink();
+            link.Inlines.Add(strUrl);
+            link.NavigateUri = new Uri(strUrl);
+            link.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(link_MouseLeftButtonDown);
+            span.Inlines.Add(link);
+            p.Inlines.Add(span);
+            p.Inlines.Add("\n");
+
+            if (this.Counts.Count > 0) {
+                p.Inlines.Add("Counts : ");
+                span = new Span { Foreground = Brushes.CadetBlue };
+                span.Inlines.Add(string.Format("G:{0}, B:{1}, C:{2}", this.Counts[0], this.Counts[1], this.Counts[2]));
+                p.Inlines.Add(span);
+                //p.Inlines.Add("\n");
+            }
+
+            return p;
+        }
+
+        void link_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Process.Start(((Hyperlink)sender).NavigateUri.ToString());
+        }
     }
 
     class ElementsPack // contains elements on a page

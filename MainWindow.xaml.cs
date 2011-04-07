@@ -5,7 +5,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using System.Windows.Media;
@@ -47,14 +46,6 @@ namespace Verde
             this.mngCanvas.Add("Main", this.canvasMain, CanvasManager.Order.ORDER_FOREGROUND);
             this.mngCanvas.Add("Settings", this.canvasSettings, CanvasManager.Order.ORDER_BACKGROUND);
 
-            //var p = new Paragraph();
-            //p.Inlines.Add("この文字は");
-            //var span = new Span { Foreground = Brushes.Red };
-            //span.Inlines.Add("赤");
-            //p.Inlines.Add(span);
-            //p.Inlines.Add("です。");
-            //this.rtboxSettings.Document.Blocks.Add(p);
-
             this.imgSplash = ImageProcessing.GetStillImageFromResource("Verde.Resources.Verde.png");
             ImageProcessing.SetImageToCenter(this.canvasMain, this.imgSplash);
 
@@ -76,8 +67,8 @@ namespace Verde
 
         private void DoImportPages(object sender, DoWorkEventArgs e)
         {
-            //this.ecAllPages.ImportPage(1);
-            this.ecAllPages.ImportPages(1, 10);
+            this.ecAllPages.ImportPage(1);
+            //this.ecAllPages.ImportPages(1, 10);
 
             // Set Background Color
             //SolidColorBrush brsBackground = new SolidColorBrush();
@@ -95,6 +86,24 @@ namespace Verde
         private void OnCompletedFader(object sender, EventArgs e)
         {
             this.imgSplash = null;
+
+            // TEST
+            for (var i = 0; i < 7; i++) {
+                Element element = this.ecAllPages.Elements[i];
+                string strUrl = "http://pya.cc" + element.UrlThumbnail;
+                this.dbImageCache.GetCache(strUrl, this.CheckPath);
+                this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
+
+                RichTextBox rtb = new RichTextBox();
+                rtb.Width = 300;
+                rtb.Height = 90;
+                rtb.Document.Blocks.Add(element.MakeParagraph());
+                Canvas.SetLeft(rtb, this.posCurrent.X + 150);
+                Canvas.SetTop(rtb, this.posCurrent.Y);
+                this.canvasMain.Children.Add(rtb);
+
+                this.posCurrent.Y += rtb.Height + 16;
+            }
         }
 
         private void CheckPath(string strPath)
@@ -114,18 +123,18 @@ namespace Verde
 
             Canvas.SetLeft(image, this.posCurrent.X);
             Canvas.SetTop(image, this.posCurrent.Y);
-            this.posCurrent.Y += image.Height + 16;
+            //this.posCurrent.Y += image.Height + 16;
 
-            Rectangle rect = new Rectangle();
-            rect.Name = "rect" + imgThumb.UriSource.Segments.Last<String>();
-            rect.Width = this.canvasMain.Width - 16;
-            rect.Height = image.Height + 16;
-            rect.Stroke = Brushes.Gray;
-            rect.RadiusX = 4;
-            rect.RadiusY = 4;
-            Canvas.SetLeft(rect, this.posCurrent.X - 8);
-            Canvas.SetTop(rect, this.posCurrent.Y - image.Height - 24);
-            this.canvasMain.Children.Add(rect);
+            //Rectangle rect = new Rectangle();
+            //rect.Name = "rect" + imgThumb.UriSource.Segments.Last<String>();
+            //rect.Width = this.canvasMain.Width - 16;
+            //rect.Height = image.Height + 16;
+            //rect.Stroke = Brushes.Gray;
+            //rect.RadiusX = 4;
+            //rect.RadiusY = 4;
+            //Canvas.SetLeft(rect, this.posCurrent.X - 8);
+            //Canvas.SetTop(rect, this.posCurrent.Y - image.Height - 24);
+            //this.canvasMain.Children.Add(rect);
 
             this.canvasMain.Children.Add(image);
 
