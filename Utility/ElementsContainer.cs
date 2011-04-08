@@ -21,19 +21,36 @@ namespace Verde.Utility
         }
 
         public static string strKeyword = "pyaimg-list";
+        public static string strBaseUrl = "http://pya.cc";
         private static bool bLargeThumb = true;
 
-        public string UrlEntry { set; get; }
-        public string UrlThumbnail { set; get; }
-        public Int64 ImageID { set; get; }
-        public Type ImageType { set; get; }
-        public string Title { set; get; }
-        public string Poster { set; get; }
-        public List<int> Counts { set; get; }
+        private string strUrlEntry;
+        public string UrlEntry { get { return this.strUrlEntry;  } }
+
+        private string strUrlThumbnail;
+        public string UrlThumbnail { get { return this.strUrlThumbnail; } }
+
+        private Int64 nImageID;
+        public Int64 ImageID { get { return this.nImageID; } }
+
+        private Type typeImage;
+        public Type ImageType { get { return this.typeImage; } }
+
+        private string strTitle;
+        public string Title { get { return this.strTitle; } }
+
+        private string strPoster;
+        public string Poster { get { return this.strPoster; } }
+
+        private List<int> listCounts;
+        public List<int> Counts { get { return this.listCounts; } }
+
+        private Showcase scContent;
+        public Showcase Content { get { return this.scContent; } }
 
         public Element()
         {
-            this.Counts = new List<int>();
+            this.listCounts = new List<int>();
         }
 
         public void Import(XElement xmlElement)
@@ -41,31 +58,29 @@ namespace Verde.Utility
             int nCount = 0;
             foreach (var item in xmlElement.Descendants()) {
                 if (item.Name.Equals(HtmlParser.nsXhtml + "a")) {
-                    this.UrlEntry = item.Attribute("href").Value;
-                    this.ImageID = Int64.Parse(this.UrlEntry.Substring(this.UrlEntry.LastIndexOf('=') + 1));
+                    this.strUrlEntry = item.Attribute("href").Value;
+                    this.nImageID = Int64.Parse(this.UrlEntry.Substring(this.UrlEntry.LastIndexOf('=') + 1));
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "img") && item.Attribute("class").Value == "thumb") {
                     string strUrl = item.Attribute("src").Value;
                     if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
                         if (Element.bLargeThumb == true) {
-                            /* 現状決め打ち "/i"を除外する */
-                            strUrl = strUrl.Substring(2);
+                            strUrl = strUrl.Substring(2); /* 現状決め打ち "/i"を除外する */
                         }
-                        //strUrl = "http://pya.cc" + strUrl;
                     }
-                    this.UrlThumbnail = strUrl;
-                    //this.dbImageCache.GetCache(strUrl, this.CheckPath);
-                    //this.dbImageCache.GetImageCache(strUrl, this.SetThumbImage);
+                    this.strUrlThumbnail = strUrl;
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "span")) {
                     XAttribute attr = item.Attribute("class");
                     if (attr != null && attr.Value == "block") {
                         switch (nCount++) {
-                            case 0: this.ImageType = this.GetType(StringProcessing.GetLastWord(item.Value)); break;
-                            case 1: this.Title = StringProcessing.GetInnerWord(item.Value, '「', '」'); break;
-                            case 2: this.Poster = StringProcessing.GetDelimitedWord(item.Value, ':'); break;
+                            case 0: this.typeImage = this.GetType(StringProcessing.GetLastWord(item.Value)); break;
+                            case 1: this.strTitle = StringProcessing.GetInnerWord(item.Value, '「', '」'); break;
+                            case 2: this.strPoster = StringProcessing.GetDelimitedWord(item.Value, ':'); break;
                             case 3: StringProcessing.GetNumbers(item.Value, ':', this.Counts); break;
                         }
                     }
                 }
+                this.scContent = new Showcase(Element.strBaseUrl);
+                this.scContent.Import(this.UrlEntry);
             }
         }
 
@@ -191,7 +206,7 @@ namespace Verde.Utility
 
         public void ImportPage(int nPage)
         {
-            string strPageUrl = strBaseUrl + nPage.ToString();
+            string strPageUrl = this.strBaseUrl + nPage.ToString();
             XDocument xmlPage = HtmlParser.Parse(HtmlParser.OpenUrl(strPageUrl));
             ElementsPack epNew = new ElementsPack();
 
