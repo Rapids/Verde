@@ -67,7 +67,7 @@ namespace Verde.Utility
                     return strRet.Substring(1);
                 }
             }
-            return string.Empty;
+            return String.Empty;
         }
 
         public static string GetDelimitedWord(string strWords, char cDelimiter)

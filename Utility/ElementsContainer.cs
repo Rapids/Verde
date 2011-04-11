@@ -61,7 +61,7 @@ namespace Verde.Utility
                     this.strUrlEntry = item.Attribute("href").Value;
                     this.nImageID = Int64.Parse(this.UrlEntry.Substring(this.UrlEntry.LastIndexOf('=') + 1));
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "img") && item.Attribute("class").Value == "thumb") {
-                    string strUrl = item.Attribute("src").Value;
+                    var strUrl = item.Attribute("src").Value;
                     if (String.Compare("http:", 0, strUrl, 0, 5) != 0) {
                         if (Element.bLargeThumb == true) {
                             strUrl = strUrl.Substring(2); /* 現状決め打ち "/i"を除外する */
@@ -69,8 +69,8 @@ namespace Verde.Utility
                     }
                     this.strUrlThumbnail = strUrl;
                 } else if (item.Name.Equals(HtmlParser.nsXhtml + "span")) {
-                    XAttribute attr = item.Attribute("class");
-                    if (attr != null && attr.Value == "block") {
+                    var attr = item.Attribute("class");
+                    if (attr != null && String.IsNullOrEmpty(attr.Value) == false && attr.Value == "block") {
                         switch (nCount++) {
                             case 0: this.typeImage = this.GetType(StringProcessing.GetLastWord(item.Value)); break;
                             case 1: this.strTitle = StringProcessing.GetInnerWord(item.Value, '「', '」'); break;
@@ -129,7 +129,7 @@ namespace Verde.Utility
 
             p.Inlines.Add("imgid : ");
             span = new Span { Foreground = Brushes.BurlyWood };
-            span.Inlines.Add(string.Format("{0}", this.ImageID));
+            span.Inlines.Add(String.Format("{0}", this.ImageID));
             p.Inlines.Add(span);
             p.Inlines.Add("\n");
 
@@ -147,7 +147,7 @@ namespace Verde.Utility
             if (this.Counts.Count > 0) {
                 p.Inlines.Add("Counts : ");
                 span = new Span { Foreground = Brushes.CadetBlue };
-                span.Inlines.Add(string.Format("G:{0}, B:{1}, C:{2}", this.Counts[0], this.Counts[1], this.Counts[2]));
+                span.Inlines.Add(String.Format("G:{0}, B:{1}, C:{2}", this.Counts[0], this.Counts[1], this.Counts[2]));
                 p.Inlines.Add(span);
                 //p.Inlines.Add("\n");
             }
