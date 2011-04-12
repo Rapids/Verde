@@ -102,6 +102,7 @@
     <Compile Include="Utility\HtmlParser.cs" />
     <Compile Include="Utility\ImageCache.cs" />
     <Compile Include="Utility\ImageProcessing.cs" />
+    <Compile Include="Utility\Logger.cs" />
     <Compile Include="Utility\Showcase.cs" />
     <Compile Include="Utility\StringProcessing.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
