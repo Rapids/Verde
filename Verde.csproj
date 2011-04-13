@@ -105,6 +105,7 @@
     <Compile Include="Utility\Logger.cs" />
     <Compile Include="Utility\Showcase.cs" />
     <Compile Include="Utility\StringProcessing.cs" />
+    <Compile Include="Utility\UserManager.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

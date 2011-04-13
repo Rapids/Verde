@@ -12,6 +12,7 @@ namespace Verde.Utility
         public static string strImageID = "SAKUHIN_AREA";
         public static string strCommentID = "PYA_COMMENT_AREA";
         private string strBaseUrl;
+        private static string[] arrIgnoreClasses = { "l_dot3", };
 
         public Showcase(string strBaseUrl)
         {
@@ -50,6 +51,22 @@ namespace Verde.Utility
         public List<string> GetComments(XElement xmlComments)
         {
             foreach (var item in xmlComments.Descendants(HtmlParser.nsXhtml + "div")) {
+                var attr = item.Attribute("class");
+                if (attr != null) {
+                    bool bIgnore = false;
+                    foreach (var str in Showcase.arrIgnoreClasses) {
+                        if (attr.Value.Equals(str)) {
+                            bIgnore = true;
+                            break;
+                        }
+                    }
+                    if (bIgnore) continue;
+                }
+
+                //foreach (var node in item.Nodes()) {
+                //    Console.WriteLine(node.ToString());
+                //}
+
                 Console.WriteLine(item.Value);
                 //foreach (var node in item.Nodes()) {
                 //    Console.WriteLine(node.ToString());
