@@ -6,17 +6,32 @@ using System.Xml.Linq;
 
 namespace Verde.Utility
 {
+    class Comment
+    {
+        public int Number { set; get; }
+        public User User { set; get; }
+        public string Word { set; get; }
+
+        public Comment()
+        {
+        }
+    }
+
     class Showcase
     {
         public static string strArgForLarge = "&imgsize=1"; /* PCサイト版画像へのアクセス */
         public static string strImageID = "SAKUHIN_AREA";
         public static string strCommentID = "PYA_COMMENT_AREA";
         private string strBaseUrl;
+        private List<string> listImages;
+        private Dictionary<int, Comment> listComments;
         private static string[] arrIgnoreClasses = { "l_dot3", };
 
         public Showcase(string strBaseUrl)
         {
             this.strBaseUrl = strBaseUrl;
+            this.listImages = new List<string>();
+            this.listComments = new Dictionary<int, Comment>();
         }
 
         public void Import(string strUrl)
@@ -28,28 +43,29 @@ namespace Verde.Utility
                 var attr = item.Attribute("id");
                 if (attr != null && String.IsNullOrEmpty(attr.Value) == false) {
                     if (attr.Value.Equals(Showcase.strImageID)) {
-                        List<string> listImages = this.GetImageUrl(item);
+                        this.MakeImageUrl(item);
                     } else if (attr.Value.Equals(Showcase.strCommentID)) {
-                        List<string> listComments = this.GetComments(item);
+                        this.MakeComments(item);
                     }
                 }
             }
-            return;
         }
 
-        public List<string> GetImageUrl(XElement xmlImage)
+        public void MakeImageUrl(XElement xmlImage)
         {
             foreach (var item in xmlImage.Descendants(HtmlParser.nsXhtml + "img")) {
                 var attr = item.Attribute("src");
                 if (attr != null && String.IsNullOrEmpty(attr.Value) == false) {
-                    Console.WriteLine(attr.Value);
+                    this.listImages.Add(attr.Value);
+                    //Console.WriteLine(attr.Value);
                 }
             }
-            return null;
         }
 
-        public List<string> GetComments(XElement xmlComments)
+        public void MakeComments(XElement xmlComments)
         {
+            var i = 0;
+            Comment comment = null;
             foreach (var item in xmlComments.Descendants(HtmlParser.nsXhtml + "div")) {
                 var attr = item.Attribute("class");
                 if (attr != null) {
@@ -63,16 +79,25 @@ namespace Verde.Utility
                     if (bIgnore) continue;
                 }
 
-                //foreach (var node in item.Nodes()) {
-                //    Console.WriteLine(node.ToString());
-                //}
+                switch (i++) {
+                    case 0:
+                        comment = new Comment();
+                        comment.Number = int.Parse(item.Value.Substring(0, item.Value.IndexOf('.')));
+                        comment.User = new User(item.Value.Substring(item.Value.IndexOf('.') + 1));
+                        break;
+                    case 1: break;
+                    case 2: break;
+                    case 3: break;
+                    case 4: break;
+                }
 
-                Console.WriteLine(item.Value);
+                //Console.WriteLine(item.Value);
                 //foreach (var node in item.Nodes()) {
                 //    Console.WriteLine(node.ToString());
                 //}
             }
-            return null;
+            this.listComments.Add(comment.Number, comment);
+            return;
         }
     }
 }
