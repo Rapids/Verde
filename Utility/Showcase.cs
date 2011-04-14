@@ -83,12 +83,15 @@ namespace Verde.Utility
                     case 0:
                         comment = new Comment();
                         comment.Number = int.Parse(item.Value.Substring(0, item.Value.IndexOf('.')));
-                        comment.User = new User(item.Value.Substring(item.Value.IndexOf('.') + 1));
+                        comment.User = new User(item.FirstNode.NextNode.NextNode.ToString());
                         break;
                     case 1: break;
                     case 2: break;
                     case 3: break;
-                    case 4: break;
+                    case 4:
+                        this.listComments.Add(comment.Number, comment);
+                        i = 0;
+                        break;
                 }
 
                 //Console.WriteLine(item.Value);
@@ -96,8 +99,6 @@ namespace Verde.Utility
                 //    Console.WriteLine(node.ToString());
                 //}
             }
-            this.listComments.Add(comment.Number, comment);
-            return;
         }
     }
 }
