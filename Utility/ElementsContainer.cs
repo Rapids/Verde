@@ -95,7 +95,7 @@ namespace Verde.Utility
             //this.scContent.Import(this.UrlEntry);
             var worker = new BackgroundWorker();
             worker.DoWork += (sender, e) => this.scContent.Import(this.UrlEntry);
-            //worker.RunWorkerCompleted += (sender, e) => this.Make
+            worker.RunWorkerCompleted += (sender, e) => this.MakeHeader();
             worker.RunWorkerAsync();
         }
 
@@ -168,6 +168,9 @@ namespace Verde.Utility
             }
 
             this.fdHeader = new FlowDocument();
+            this.fdHeader.Width = 300;
+            this.fdHeader.Height = 90;
+            this.fdHeader.Blocks.Add(p);
         }
 
         void link_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

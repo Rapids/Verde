@@ -94,13 +94,9 @@ namespace Verde
                 this.dbImageCache.GetCache(strUrl, this.CheckPath);
                 this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
 
-                RichTextBox rtb = new RichTextBox();
-                rtb.Width = 300;
-                rtb.Height = 90;
-                rtb.Document.Blocks.Add(element.MakeHeader());
-                Canvas.SetLeft(rtb, this.posCurrent.X + 150);
-                Canvas.SetTop(rtb, this.posCurrent.Y);
-                this.canvasMain.Children.Add(rtb);
+                Canvas.SetLeft(element.Header, this.posCurrent.X + 150);
+                Canvas.SetTop(element.Header, this.posCurrent.Y);
+                this.canvasMain.Children.Add(element.Header);
 
                 this.posCurrent.Y += rtb.Height + 16;
             }
