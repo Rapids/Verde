@@ -54,15 +54,15 @@ namespace Verde
 
         private void btnQuery_Click(object sender, RoutedEventArgs e)
         {
-            var bgWorker = new BackgroundWorker();
-            bgWorker.DoWork += new DoWorkEventHandler(DoImportPages);
-            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnImportCompleted);
+            var worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(DoImportPages);
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnCompletedImport);
 
             this.curBackingStore = Mouse.OverrideCursor;
             Mouse.OverrideCursor = Cursors.Wait;
             ImageProcessing.SetImage(this.canvasMain, MainWindow.posLoadingGif, this.gifLoading.FrameImage);
 
-            bgWorker.RunWorkerAsync();
+            worker.RunWorkerAsync();
         }
 
         private void DoImportPages(object sender, DoWorkEventArgs e)
@@ -76,7 +76,7 @@ namespace Verde
             //this.canvasMain.Background = brsBackground;
         }
 
-        private void OnImportCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void OnCompletedImport(object sender, RunWorkerCompletedEventArgs e)
         {
             ImageProcessing.FadeOut(this.gifLoading.FrameImage, 100, null);
             ImageProcessing.FadeOut(this.imgSplash, 500, this.OnCompletedFader);
@@ -97,7 +97,7 @@ namespace Verde
                 RichTextBox rtb = new RichTextBox();
                 rtb.Width = 300;
                 rtb.Height = 90;
-                rtb.Document.Blocks.Add(element.MakeParagraph());
+                rtb.Document.Blocks.Add(element.MakeHeader());
                 Canvas.SetLeft(rtb, this.posCurrent.X + 150);
                 Canvas.SetTop(rtb, this.posCurrent.Y);
                 this.canvasMain.Children.Add(rtb);

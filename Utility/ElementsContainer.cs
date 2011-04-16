@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.Windows.Media;
 using System.Windows.Documents;
+using System.ComponentModel;
 
 namespace Verde.Utility
 {
@@ -24,6 +25,7 @@ namespace Verde.Utility
         public static string strBaseUrl = "http://pya.cc";
         private static bool bLargeThumb = true;
 
+        #region Properties ====================================================
         private string strUrlEntry;
         public string UrlEntry { get { return this.strUrlEntry;  } }
 
@@ -47,6 +49,14 @@ namespace Verde.Utility
 
         private Showcase scContent;
         public Showcase Content { get { return this.scContent; } }
+
+        private FlowDocument fdHeader;
+        public FlowDocument Header { get { return this.fdHeader; } }
+        #endregion
+
+        #region Events ====================================================
+        public event EventHandler ImportCompleted;
+        #endregion
 
         public Element()
         {
@@ -79,9 +89,14 @@ namespace Verde.Utility
                         }
                     }
                 }
-                this.scContent = new Showcase(Element.strBaseUrl);
-                this.scContent.Import(this.UrlEntry);
             }
+
+            this.scContent = new Showcase(Element.strBaseUrl);
+            //this.scContent.Import(this.UrlEntry);
+            var worker = new BackgroundWorker();
+            worker.DoWork += (sender, e) => this.scContent.Import(this.UrlEntry);
+            //worker.RunWorkerCompleted += (sender, e) => this.Make
+            worker.RunWorkerAsync();
         }
 
         Type GetType(string strType)
@@ -112,7 +127,7 @@ namespace Verde.Utility
         //{
         //}
 
-        public Paragraph MakeParagraph()
+        public void MakeHeader()
         {
             Paragraph p = new Paragraph();
             p.Inlines.Add("Title : ");
@@ -152,7 +167,7 @@ namespace Verde.Utility
                 //p.Inlines.Add("\n");
             }
 
-            return p;
+            this.fdHeader = new FlowDocument();
         }
 
         void link_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

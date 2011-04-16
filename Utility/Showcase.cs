@@ -27,6 +27,9 @@ namespace Verde.Utility
         private Dictionary<int, Comment> listComments;
         private static string[] arrIgnoreClasses = { "l_dot3", };
 
+        private bool bCompleted = false;
+        public bool Completed { get { return this.bCompleted; } }
+
         public Showcase(string strBaseUrl)
         {
             this.strBaseUrl = strBaseUrl;
@@ -49,6 +52,7 @@ namespace Verde.Utility
                     }
                 }
             }
+            this.bCompleted = true;
         }
 
         public void MakeImageUrl(XElement xmlImage)
