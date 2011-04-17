@@ -52,10 +52,9 @@ namespace Verde.Utility
 
         private FlowDocument fdHeader;
         public FlowDocument Header { get { return this.fdHeader; } }
-        #endregion
 
-        #region Events ====================================================
-        public event EventHandler ImportCompleted;
+        private bool bFetched;
+        public bool Fetched { get { return this.bFetched; } }
         #endregion
 
         public Element()
@@ -91,11 +90,12 @@ namespace Verde.Utility
                 }
             }
 
+            this.MakeHeader();
             this.scContent = new Showcase(Element.strBaseUrl);
             //this.scContent.Import(this.UrlEntry);
             var worker = new BackgroundWorker();
             worker.DoWork += (sender, e) => this.scContent.Import(this.UrlEntry);
-            //worker.RunWorkerCompleted += (sender, e) => this.Make
+            worker.RunWorkerCompleted += (sender, e) => { this.bFetched = true; };
             worker.RunWorkerAsync();
         }
 

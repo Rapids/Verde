@@ -97,7 +97,7 @@ namespace Verde
                 RichTextBox rtb = new RichTextBox();
                 rtb.Width = 300;
                 rtb.Height = 90;
-                rtb.Document.Blocks.Add(element.MakeHeader());
+                rtb.Document = element.Header;
                 Canvas.SetLeft(rtb, this.posCurrent.X + 150);
                 Canvas.SetTop(rtb, this.posCurrent.Y);
                 this.canvasMain.Children.Add(rtb);
