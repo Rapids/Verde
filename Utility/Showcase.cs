@@ -81,13 +81,17 @@ namespace Verde.Utility
                         }
                     }
                     if (bIgnore) continue;
+                    if (attr.Value.Equals("cmt-1")) {
+                        comment.Word = item.Value;
+                    }
                 }
 
                 switch (i++) {
                     case 0:
                         comment = new Comment();
-                        comment.Number = int.Parse(item.Value.Substring(0, item.Value.IndexOf('.')));
+                        comment.Number = int.Parse(item.FirstNode.ToString().Substring(0, item.Value.IndexOf('.')));
                         comment.User = new User(item.FirstNode.NextNode.NextNode.ToString());
+                        comment.User.IconUrl = item.FirstNode.NextNode.ToString();
                         break;
                     case 1: break;
                     case 2: break;

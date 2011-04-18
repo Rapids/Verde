@@ -93,16 +93,25 @@ namespace Verde
                 string strUrl = "http://pya.cc" + element.UrlThumbnail;
                 this.dbImageCache.GetCache(strUrl, this.CheckPath);
                 this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
-
-                RichTextBox rtb = new RichTextBox(element.Header);
-                rtb.Width = 300;
-                rtb.Height = 90;
-                Canvas.SetLeft(rtb, this.posCurrent.X + 150);
-                Canvas.SetTop(rtb, this.posCurrent.Y);
-                this.canvasMain.Children.Add(rtb);
-
-                this.posCurrent.Y += rtb.Height + 16;
+                var dispatcher = Application.Current.Dispatcher;
+                if (dispatcher.CheckAccess()) {
+                    this.ShowHeader(element);
+                } else {
+                    dispatcher.Invoke((Delegate)(Action)(() => this.ShowHeader(element)));
+                }
+                //this.posCurrent.Y += rtb.Height + 16;
+                this.posCurrent.Y += 90 + 16;
             }
+        }
+
+        private void ShowHeader(Element element)
+        {
+            RichTextBox rtb = new RichTextBox(element.Header);
+            rtb.Width = 300;
+            rtb.Height = 90;
+            Canvas.SetLeft(rtb, this.posCurrent.X + 150);
+            Canvas.SetTop(rtb, this.posCurrent.Y);
+            this.canvasMain.Children.Add(rtb);
         }
 
         private void CheckPath(string strPath)
