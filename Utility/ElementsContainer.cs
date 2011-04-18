@@ -162,12 +162,17 @@ namespace Verde.Utility
             if (this.Counts.Count > 0) {
                 p.Inlines.Add("Counts : ");
                 span = new Span { Foreground = Brushes.CadetBlue };
-                span.Inlines.Add(String.Format("G:{0}, B:{1}, C:{2}", this.Counts[0], this.Counts[1], this.Counts[2]));
+                if (this.Counts.Count == 2) {
+                    span.Inlines.Add(String.Format("G:{0}, B:{1}", this.Counts[0], this.Counts[1]));
+                } else if (this.Counts.Count > 2) {
+                    span.Inlines.Add(String.Format("G:{0}, B:{1}, C:{2}", this.Counts[0], this.Counts[1], this.Counts[2]));
+                }
                 p.Inlines.Add(span);
                 //p.Inlines.Add("\n");
             }
 
             this.fdHeader = new FlowDocument();
+            this.fdHeader.Blocks.Add(p);
         }
 
         void link_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
