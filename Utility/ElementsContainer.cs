@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Documents;
 using System.ComponentModel;
@@ -18,12 +19,14 @@ namespace Verde.Utility
             VIDEO,
             TEXT,
             FLASH,
-            EROINA
+            EROINA,
+            OTHER
         }
 
         public static string strKeyword = "pyaimg-list";
         public static string strBaseUrl = "http://pya.cc";
         private static bool bLargeThumb = true;
+        private bool bPrefetch = true;
 
         #region Properties ====================================================
         private string strUrlEntry;
@@ -90,13 +93,38 @@ namespace Verde.Utility
                 }
             }
 
-            this.MakeHeader();
-            this.scContent = new Showcase(Element.strBaseUrl);
-            //this.scContent.Import(this.UrlEntry);
-            var worker = new BackgroundWorker();
-            worker.DoWork += (sender, e) => this.scContent.Import(this.UrlEntry);
-            worker.RunWorkerCompleted += (sender, e) => { this.bFetched = true; };
-            worker.RunWorkerAsync();
+            var dispatcher = Application.Current.Dispatcher;
+            if (dispatcher.CheckAccess()) {
+                this.MakeHeader();
+            } else {
+                dispatcher.Invoke((Delegate)(Action)(() => this.MakeHeader()));
+            }
+
+            if (this.bPrefetch) {
+                this.scContent = new Showcase(Element.strBaseUrl);
+                //this.scContent.Import(this.UrlEntry);
+                var worker = new BackgroundWorker();
+                worker.DoWork += (sender, e) => this.scContent.Import(this.UrlEntry);
+                worker.RunWorkerCompleted += (sender, e) => {
+                    if (dispatcher.CheckAccess()) {
+                        this.NoticeOfFetched();
+                    } else {
+                        dispatcher.Invoke((Delegate)(Action)(() => this.NoticeOfFetched()));
+                    }
+                    this.bFetched = true;
+                };
+                worker.RunWorkerAsync();
+            }
+        }
+
+        private void NoticeOfFetched()
+        {
+            Paragraph p = new Paragraph();
+            var span = new Span { Foreground = Brushes.Red };
+            span.Inlines.Add("fetched.");
+            p.Inlines.Add(span);
+            p.Inlines.Add("\n");
+            this.fdHeader.Blocks.Add(p);
         }
 
         Type GetType(string strType)
@@ -113,6 +141,8 @@ namespace Verde.Utility
                 typeRet = Type.FLASH;
             } else if (strType == "Eroina") {
                 typeRet = Type.EROINA;
+            } else if (strType == "Other") {
+                typeRet = Type.OTHER;
             }
 
             return typeRet;
@@ -136,12 +166,15 @@ namespace Verde.Utility
             p.Inlines.Add(span);
             p.Inlines.Add("\n");
 
-            p.Inlines.Add("Poster : ");
-            span = new Span { Foreground = Brushes.Brown };
-            span.Inlines.Add(this.Poster);
-            p.Inlines.Add(span);
-            p.Inlines.Add("\n");
+            if (this.Poster.Length > 0) {
+                p.Inlines.Add("Poster : ");
+                span = new Span { Foreground = Brushes.Brown };
+                span.Inlines.Add(this.Poster);
+                p.Inlines.Add(span);
+                p.Inlines.Add("\n");
+            }
 
+#if false
             p.Inlines.Add("imgid : ");
             span = new Span { Foreground = Brushes.BurlyWood };
             span.Inlines.Add(String.Format("{0}", this.ImageID));
@@ -158,6 +191,7 @@ namespace Verde.Utility
             span.Inlines.Add(link);
             p.Inlines.Add(span);
             p.Inlines.Add("\n");
+#endif
 
             if (this.Counts.Count > 0) {
                 p.Inlines.Add("Counts : ");

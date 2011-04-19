@@ -12,13 +12,39 @@ namespace Verde.Utility
         public int PickedupCount { set; get; }
         public string IconUrl { set; get; }
 
-        public User(string strNameCandidate)
+        public User()
         {
-            this.Name = strNameCandidate.Trim();
         }
     }
 
     class UserManager
     {
+        private Dictionary<string, User> listUsers;
+
+        public static UserManager GlobalUserManager = new UserManager();
+
+        public UserManager()
+        {
+            this.listUsers = new Dictionary<string, User>();
+        }
+
+        public User Register(string strNameCandidate, string strIconUrl)
+        {
+            User user = null;
+            lock (this) {
+                string strName = strNameCandidate.Trim();
+
+                if (!this.listUsers.ContainsKey(strName)) {
+                    user = new User();
+                    user.Name = strName;
+                    user.IconUrl = strIconUrl;
+                    this.listUsers.Add(strName, user);
+                } else {
+                    user = this.listUsers[strName];
+                }
+            }
+
+            return user;
+        }
     }
 }

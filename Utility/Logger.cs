@@ -13,6 +13,8 @@ namespace Verde.Utility
 
         string strDateFormat = strDefaultDateFormat;
 
+        public static Logger GlobalLogger = new Logger();
+
         public Logger()
         : this(String.Format(Logger.strDefaultLogFilename, System.DateTime.Now.ToString(Logger.strDateFormatForFilename)), System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), Logger.strDefaultDateFormat)
         {

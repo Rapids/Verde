@@ -93,12 +93,7 @@ namespace Verde
                 string strUrl = "http://pya.cc" + element.UrlThumbnail;
                 this.dbImageCache.GetCache(strUrl, this.CheckPath);
                 this.dbImageCache.GetImageCache(strUrl, this.DrawThumbImage);
-                var dispatcher = Application.Current.Dispatcher;
-                if (dispatcher.CheckAccess()) {
-                    this.ShowHeader(element);
-                } else {
-                    dispatcher.Invoke((Delegate)(Action)(() => this.ShowHeader(element)));
-                }
+                this.ShowHeader(element);
                 //this.posCurrent.Y += rtb.Height + 16;
                 this.posCurrent.Y += 90 + 16;
             }
