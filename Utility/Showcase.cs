@@ -23,6 +23,7 @@ namespace Verde.Utility
         public static string strImageID = "SAKUHIN_AREA";
         public static string strCommentID = "PYA_COMMENT_AREA";
         public static string strCommentClass = "cmt-1";
+        public static string strKaDateClass = "kadate";
         public static string strResID = "RES_CMT_";
         private string strBaseUrl;
         private List<string> listImages;
@@ -70,7 +71,6 @@ namespace Verde.Utility
 
         public void MakeComments(XElement xmlComments)
         {
-            var i = 0;
             Comment comment = null;
             foreach (var item in xmlComments.Descendants(HtmlParser.nsXhtml + "div")) {
                 var attrClass = item.Attribute("class");
@@ -84,7 +84,9 @@ namespace Verde.Utility
                     }
                     if (bIgnore) continue;
                     if (attrClass.Value.Equals(Showcase.strCommentClass)) {
-                        comment.Word = item.Value;
+                        if (comment != null) {
+                            comment.Word = item.Value;
+                        }
                         continue;
                     }
                 } else {
@@ -99,11 +101,20 @@ namespace Verde.Utility
                 var itemTable = this.ExtractTaggedField(item, "table");
 
                 if (itemSpan == null && itemTable == null) {
+                    if (item.Descendants(HtmlParser.nsXhtml + "img").Count() == 0) {
+                        // Res Tree
+                        Logger.GlobalLogger.Write(item.Value);
+                        continue;
+                    }
                     if (comment != null) {
                         this.listComments.Add(comment.Number, comment);
                     }
                     comment = this.CreateComment(item);
                 } else if (itemSpan != null) {
+                    var attrSpanClass = itemSpan.Attribute("class");
+                    if (attrSpanClass != null && attrSpanClass.Equals(Showcase.strKaDateClass)) {
+                        Logger.GlobalLogger.Write(itemSpan.Value);
+                    }
                 }
             }
 

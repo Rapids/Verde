@@ -18,7 +18,7 @@ namespace Verde.Utility
             ORDER_FADING     = 2,
         };
 
-        private static int nBackgroundZ = 0;
+        //private static int nBackgroundZ = 0;
         private static int nForegroundZ = 1;
         private static int nFadingZ     = 2;
         private Dictionary<string, Canvas> dicCanvas = null;
