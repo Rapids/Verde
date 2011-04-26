@@ -78,7 +78,7 @@ namespace Verde.Utility
         public static void GetNumbers(string strWords, char cDelimiter, List<int> listNumbers)
         {
             string strTmp = strWords;
-            for (; ; ) {
+            while (true) {
                 var nPos = strTmp.IndexOf(cDelimiter);
                 if (nPos < 0) break;
                 string strNumber = strTmp.Substring(nPos + 1);
