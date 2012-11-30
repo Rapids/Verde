@@ -261,6 +261,9 @@ namespace Verde.Utility
         public void ImportPage(int nPage)
         {
             string strPageUrl = this.strBaseUrl + nPage.ToString();
+
+            ApiParser.ParseIndexApi(strBaseUrl + "view=4");
+
             XDocument xmlPage = HtmlParser.Parse(HtmlParser.OpenUrl(strPageUrl));
             ElementsPack epNew = new ElementsPack();
 
