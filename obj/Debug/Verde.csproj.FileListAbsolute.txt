@@ -1,0 +1,12 @@
+D:\Work\GitHub\Verde\obj\Debug\ResolveAssemblyReference.cache
+D:\Work\GitHub\Verde\obj\Debug\MainWindow.baml
+D:\Work\GitHub\Verde\obj\Debug\MainWindow.g.cs
+D:\Work\GitHub\Verde\obj\Debug\App.g.cs
+D:\Work\GitHub\Verde\obj\Debug\Verde_MarkupCompile.cache
+D:\Work\GitHub\Verde\obj\Debug\Verde.g.resources
+D:\Work\GitHub\Verde\obj\Debug\Verde.Properties.Resources.resources
+D:\Work\GitHub\Verde\obj\Debug\Verde.csproj.GenerateResource.Cache
+D:\Work\GitHub\Verde\bin\Debug\Verde.exe
+D:\Work\GitHub\Verde\bin\Debug\Verde.pdb
+D:\Work\GitHub\Verde\obj\Debug\Verde.exe
+D:\Work\GitHub\Verde\obj\Debug\Verde.pdb

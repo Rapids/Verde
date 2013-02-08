@@ -108,7 +108,7 @@ namespace Verde.Utility
     
     class ApiParser
     {
-        public static void ParseIndexApi(string strUrl)
+        public static List<ShowcaseInfo> ParseIndexApi(string strUrl)
         {
             WebClient client = new WebClient();
             client.Encoding = Encoding.UTF8;
@@ -134,6 +134,8 @@ namespace Verde.Utility
             }
 
             System.Windows.MessageBox.Show(str);
+
+            return showcaseList;
         }
     }
 }

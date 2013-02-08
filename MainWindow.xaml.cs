@@ -29,7 +29,7 @@ namespace Verde
         private bool bDisplaySettings = false;
         private static double nStartPos = 56;
         private static Point posLoadingGif = new Point(10, 10);
-        private string strHomeUrl = "http://pya.cc/ipn/index.php?page=";
+        private string strHomeUrl = "http://test01.pya.cc/api/indexapi.php?page=";
         private Image imgSplash;
         private Cursor curBackingStore;
         private AnimationGif gifLoading;

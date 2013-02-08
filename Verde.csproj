@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B7E9D393-37C2-4B4D-AC25-C9B32B4DE6E6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -34,15 +34,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SgmlReaderDll, Version=1.8.7.275, Culture=neutral, PublicKeyToken=46b2db9ca481831b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dll\SgmlReaderDll.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceModel.Web">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -96,14 +98,13 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Utility\ApiParser.cs" />
     <Compile Include="Utility\CanvasManager.cs" />
     <Compile Include="Utility\ElementsContainer.cs" />
     <Compile Include="Utility\HeadingElement.cs" />
-    <Compile Include="Utility\HtmlParser.cs" />
     <Compile Include="Utility\ImageCache.cs" />
     <Compile Include="Utility\ImageProcessing.cs" />
     <Compile Include="Utility\Logger.cs" />
-    <Compile Include="Utility\Showcase.cs" />
     <Compile Include="Utility\StringProcessing.cs" />
     <Compile Include="Utility\UserManager.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
